@@ -1369,12 +1369,17 @@ elif seleccion == "Dashboard":
 
             for _, fila in top_5.iterrows():
 
+                st.markdown("### 🏆 Top 5 Mejores")
+
+            for _, fila in top_5.iterrows():
+
                 st.markdown(
                     f"""
                     <div style="
                         padding:12px;
                         border-radius:10px;
                         background-color:#f5f7fa;
+                        color:#000000;
                         margin-bottom:8px;
                         border:1px solid #dfe6ee;
                     ">
@@ -1389,6 +1394,7 @@ elif seleccion == "Dashboard":
                     """,
                     unsafe_allow_html=True
                 )
+
 
         # ------------------------------------------------
         # TOP 5 PEORES
@@ -1406,6 +1412,7 @@ elif seleccion == "Dashboard":
                         padding:12px;
                         border-radius:10px;
                         background-color:#fff5f5;
+                        color:#000000;
                         margin-bottom:8px;
                         border:1px solid #f0d0d0;
                     ">
@@ -1466,6 +1473,7 @@ elif seleccion == "Dashboard":
                     padding:15px;
                     border-radius:12px;
                     background-color:#f4f4f4;
+                    color:#000000;
                     margin-bottom:15px;
                     border:1px solid #d9d9d9;
                 ">
@@ -1519,6 +1527,7 @@ elif seleccion == "Dashboard":
                     padding:15px;
                     border-radius:12px;
                     background-color:#f5f7fa;
+                    color:#000000;
                     margin-bottom:10px;
                     border:1px solid #dfe6ee;
                 ">
@@ -1586,6 +1595,7 @@ elif seleccion == "Dashboard":
                         padding:12px;
                         border-radius:10px;
                         background-color:#f5f7fa;
+                        color:#000000;
                         margin-bottom:8px;
                         border:1px solid #dfe6ee;
                     ">
@@ -1609,6 +1619,7 @@ elif seleccion == "Dashboard":
                         padding:12px;
                         border-radius:10px;
                         background-color:#fff5f5;
+                        color:#000000;
                         margin-bottom:8px;
                         border:1px solid #f0d0d0;
                     ">
@@ -1670,6 +1681,7 @@ elif seleccion == "Dashboard":
                         padding:12px;
                         border-radius:10px;
                         background-color:#f5f7fa;
+                        color:#000000;
                         margin-bottom:8px;
                         border:1px solid #dfe6ee;
                     ">
@@ -1693,6 +1705,7 @@ elif seleccion == "Dashboard":
                         padding:12px;
                         border-radius:10px;
                         background-color:#fff5f5;
+                        color:#000000;
                         margin-bottom:8px;
                         border:1px solid #f0d0d0;
                     ">
@@ -1754,6 +1767,7 @@ elif seleccion == "Dashboard":
                     padding:15px;
                     border-radius:12px;
                     background-color:#fff4f4;
+                    color:#000000;
                     margin-bottom:10px;
                     border:1px solid #f5c2c2;
                 ">
