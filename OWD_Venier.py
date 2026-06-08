@@ -300,7 +300,7 @@ if seleccion == "Nueva Auditoría":
 
                 st.warning(
                     "🚨 Planes de Acción pendientes:\n\n"
-                    + "\n".join(mensajes[:5])
+                    + "\n".join(mensajes)
                 )
 
     except:
