@@ -1369,10 +1369,6 @@ elif seleccion == "Dashboard":
 
             for _, fila in top_5.iterrows():
 
-                st.markdown("### 🏆 Top 5 Mejores")
-
-            for _, fila in top_5.iterrows():
-
                 st.markdown(
                     f"""
                     <div style="
