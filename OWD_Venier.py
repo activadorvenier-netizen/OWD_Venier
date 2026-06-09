@@ -264,7 +264,7 @@ if seleccion == "Nueva Auditoría":
 
             hoy = datetime.now().date()
 
-            mensajes = []
+            resumen_responsables = {}
 
             for _, fila in df_alertas.iterrows():
 
@@ -280,28 +280,44 @@ if seleccion == "Nueva Auditoría":
                     fecha_limite.date() - hoy
                 ).days
 
+                responsable = str(
+                    fila["RESPONSABLE"]
+                ).strip()
+
+                if responsable == "":
+                    responsable = "Sin Responsable"
+
+                if responsable not in resumen_responsables:
+
+                    resumen_responsables[responsable] = {
+                        "total": 0,
+                        "vencidos": 0
+                    }
+
+                resumen_responsables[responsable]["total"] += 1
+
                 if dias < 0:
 
-                    mensajes.append(
-                        f"🔴 {fila['AUDITADO']} - "
-                        f"{fila['PROCESO']} "
-                        f"(vencido hace {abs(dias)} días)"
-                    )
+                    resumen_responsables[responsable]["vencidos"] += 1
 
-                elif dias <= 7:
+            mensajes = []
 
-                    mensajes.append(
-                        f"🟡 {fila['AUDITADO']} - "
-                        f"{fila['PROCESO']} "
-                        f"(vence en {dias} días)"
-                    )
+            for responsable, datos in resumen_responsables.items():
 
-            if len(mensajes) > 0:
+                mensajes.append(
+                    f"🔴 {responsable}: "
+                    f"{datos['total']} PDA pendientes "
+                    f"({datos['vencidos']} vencidos)"
+                )
+
+            if mensajes:
 
                 st.warning(
-                    "🚨 Planes de Acción pendientes:\n\n"
+                    "🚨 Planes de Acción pendientes por Responsable:\n\n"
                     + "\n".join(mensajes)
                 )
+
+            
 
     except:
         pass
