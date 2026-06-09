@@ -3010,11 +3010,15 @@ elif seleccion == "Historial":
                     ).date()
                 )
 
+                auditor_actual = str(fila["AUDITOR"])
+
                 auditor_editado = st.selectbox(
                     "Auditor",
                     lista_auditores,
-                    index=lista_auditores.index(
-                        str(fila["AUDITOR"])
+                    index=(
+                        lista_auditores.index(auditor_actual)
+                        if auditor_actual in lista_auditores
+                        else 0
                     )
                 )
 
