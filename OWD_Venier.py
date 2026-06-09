@@ -300,21 +300,38 @@ if seleccion == "Nueva Auditoría":
 
                     resumen_responsables[responsable]["vencidos"] += 1
 
-            mensajes = []
+            if resumen_responsables:
 
-            for responsable, datos in resumen_responsables.items():
+                html_alerta = """
+                <div style="
+                    padding:15px;
+                    border-radius:10px;
+                    background-color:#fff3cd;
+                    border:1px solid #ffe69c;
+                    margin-bottom:15px;
+                    color:#000000;
+                ">
+                <h4>🚨 Planes de Acción pendientes por Responsable</h4>
+                """
 
-                mensajes.append(
-                    f"🔴 {responsable}: "
-                    f"{datos['total']} PDA pendientes "
-                    f"({datos['vencidos']} vencidos)"
-                )
+                for responsable, datos in resumen_responsables.items():
 
-            if mensajes:
+                    color = "🔴" if datos["vencidos"] > 0 else "🟡"
 
-                st.warning(
-                    "🚨 Planes de Acción pendientes por Responsable:\n\n"
-                    + "\n".join(mensajes)
+                    html_alerta += f"""
+                    <p style="margin-bottom:8px;">
+                        {color}
+                        <b>{responsable}</b>:
+                        {datos['total']} PDA pendientes
+                        ({datos['vencidos']} vencidos)
+                    </p>
+                    """
+
+                html_alerta += "</div>"
+
+                st.markdown(
+                    html_alerta,
+                    unsafe_allow_html=True
                 )
 
             
