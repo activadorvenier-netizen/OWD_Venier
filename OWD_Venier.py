@@ -302,37 +302,33 @@ if seleccion == "Nueva Auditoría":
 
             if resumen_responsables:
 
-                html_alerta = """
-                <div style="
-                    padding:15px;
-                    border-radius:10px;
-                    background-color:#fff3cd;
-                    border:1px solid #ffe69c;
-                    margin-bottom:15px;
-                    color:#000000;
-                ">
-                <h4>🚨 Planes de Acción pendientes por Responsable</h4>
-                """
-
-                for responsable, datos in resumen_responsables.items():
-
-                    color = "🔴" if datos["vencidos"] > 0 else "🟡"
-
-                    html_alerta += f"""
-                    <p style="margin-bottom:8px;">
-                        {color}
-                        <b>{responsable}</b>:
-                        {datos['total']} PDA pendientes
-                        ({datos['vencidos']} vencidos)
-                    </p>
-                    """
-
-                html_alerta += "</div>"
-
-                st.markdown(
-                    html_alerta,
-                    unsafe_allow_html=True
+                st.warning(
+                    f"🚨 Hay {sum(d['total'] for d in resumen_responsables.values())} Planes de Acción pendientes"
                 )
+
+                with st.expander(
+                    "Ver detalle por Responsable",
+                    expanded=True
+                ):
+
+                    for responsable, datos in sorted(
+                        resumen_responsables.items(),
+                        key=lambda x: x[1]["vencidos"],
+                        reverse=True
+                    ):
+
+                        icono = "🔴" if datos["vencidos"] > 0 else "🟡"
+
+                        st.markdown(
+                            f"""
+            **{icono} {responsable}**
+
+            • PDA pendientes: **{datos['total']}**  
+            • PDA vencidos: **{datos['vencidos']}**
+            """
+                        )
+
+                        st.divider()
 
             
 
