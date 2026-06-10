@@ -94,6 +94,27 @@ def agregar_respuestas_sql(df):
     conn.close()
 
 # ------------------------------------------------
+# ELIMINAR AUDITORÍA
+# ------------------------------------------------
+
+def eliminar_auditoria_sql(id_auditoria):
+
+    conn = sqlite3.connect(db_path)
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        DELETE FROM RESPUESTAS
+        WHERE ID_AUDITORIA = ?
+        """,
+        (str(id_auditoria),)
+    )
+
+    conn.commit()
+    conn.close()
+
+# ------------------------------------------------
 # LEER EXCEL
 # ------------------------------------------------
 
@@ -2924,19 +2945,8 @@ elif seleccion == "Historial":
                         use_container_width=True
                     ):
 
-                        df_original = leer_sql(
-                            "RESPUESTAS"
-                        )
-
-                        df_original = df_original[
-                            df_original["ID_AUDITORIA"]
-                            .astype(str)
-                            != auditoria_seleccionada
-                        ]
-
-                        guardar_sql(
-                            df_original,
-                            "RESPUESTAS"
+                        eliminar_auditoria_sql(
+                            auditoria_seleccionada
                         )
 
                         st.session_state.confirmar_eliminacion = False
