@@ -23,36 +23,34 @@ if "form_id" not in st.session_state:
     st.session_state.form_id = 0
 
 # ------------------------------------------------
-# RUTAS
+# POSTGRESQL
 # ------------------------------------------------
 
-db_path = "database/owd_venier.db"
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+engine = create_engine(DATABASE_URL)
 
 pasta_fotos = Path("fotos_owd")
 pasta_fotos.mkdir(exist_ok=True)
 
 # =========================================================
-# SQLITE
+# LEER TABLAS
 # =========================================================
 
 def leer_sql(tabla):
 
-    conn = sqlite3.connect(db_path)
-
     try:
 
-        df = pd.read_sql(
-            f"SELECT * FROM {tabla}",
-            conn
+        return pd.read_sql(
+            f'SELECT * FROM "{tabla}"',
+            engine
         )
 
-    except:
+    except Exception as e:
 
-        df = pd.DataFrame()
+        print(f"Error leyendo {tabla}: {e}")
 
-    conn.close()
-
-    return df
+        return pd.DataFrame()
 
 
 # ------------------------------------------------
@@ -63,16 +61,12 @@ def guardar_sql(df, tabla):
 
     st.cache_data.clear()
 
-    conn = sqlite3.connect(db_path)
-
     df.to_sql(
         tabla,
-        conn,
+        engine,
         if_exists="replace",
         index=False
     )
-
-    conn.close()
 
 
 # ------------------------------------------------
@@ -83,16 +77,13 @@ def agregar_respuestas_sql(df):
 
     st.cache_data.clear()
 
-    conn = sqlite3.connect(db_path)
-
     df.to_sql(
         "RESPUESTAS",
-        conn,
+        engine,
         if_exists="append",
         index=False
     )
 
-    conn.close()
 
 # ------------------------------------------------
 # ELIMINAR AUDITORÍA
@@ -100,20 +91,53 @@ def agregar_respuestas_sql(df):
 
 def eliminar_auditoria_sql(id_auditoria):
 
-    conn = sqlite3.connect(db_path)
+    with engine.begin() as conn:
 
-    cursor = conn.cursor()
+        conn.exec_driver_sql(
+            """
+            DELETE FROM "RESPUESTAS"
+            WHERE "ID_AUDITORIA" = %s
+            """,
+            (str(id_auditoria),)
+        )
 
-    cursor.execute(
-        """
-        DELETE FROM RESPUESTAS
-        WHERE ID_AUDITORIA = ?
-        """,
-        (str(id_auditoria),)
-    )
+# ------------------------------------------------
+# ACTUALIZAR PDA
+# ------------------------------------------------
 
-    conn.commit()
-    conn.close()
+def actualizar_pda_sql(
+    id_auditoria,
+    plan_accion,
+    responsable,
+    fecha_limite,
+    estado,
+    evidencia
+):
+
+    with engine.begin() as conn:
+
+        conn.exec_driver_sql(
+            """
+            UPDATE "RESPUESTAS"
+            SET
+                "PLAN_ACCION" = %s,
+                "RESPONSABLE" = %s,
+                "FECHA_LIMITE" = %s,
+                "ESTADO" = %s,
+                "EVIDENCIA" = %s
+            WHERE
+                "ID_AUDITORIA" = %s
+                AND "PREGUNTA" = 'Requiere Plan de Acción'
+            """,
+            (
+                plan_accion,
+                responsable,
+                str(fecha_limite),
+                estado,
+                evidencia,
+                str(id_auditoria)
+            )
+        )
 
 # ------------------------------------------------
 # LEER EXCEL
@@ -2606,60 +2630,16 @@ elif seleccion == "Planes de Acción":
                             evidencia.getbuffer()
                         )
 
-                idx = fila["index"]
+                if estado != "Completado":
+                    ruta_evidencia = ""
 
-                df_original = leer_sql(
-                    "RESPUESTAS"
-                )
-
-                df_original.loc[
-                    idx,
-                    "PLAN_ACCION"
-                ] = plan_accion
-
-                df_original.loc[
-                    idx,
-                    "RESPONSABLE"
-                ] = responsable
-
-                df_original.loc[
-                    idx,
-                    "FECHA_LIMITE"
-                ] = str(fecha_limite)
-
-                df_original.loc[
-                    idx,
-                    "ESTADO"
-                ] = estado
-
-                if estado == "Completado":
-
-                    df_original.loc[
-                        idx,
-                        "EVIDENCIA"
-                    ] = ruta_evidencia
-
-                else:
-
-                    evidencia_anterior = str(
-                        df_original.loc[idx, "EVIDENCIA"]
-                    )
-
-                    if (
-                        evidencia_anterior != ""
-                        and os.path.exists(evidencia_anterior)
-                    ):
-
-                        os.remove(evidencia_anterior)
-
-                    df_original.loc[
-                        idx,
-                        "EVIDENCIA"
-                    ] = ""
-
-                guardar_sql(
-                    df_original,
-                    "RESPUESTAS"
+                actualizar_pda_sql(
+                    fila["ID_AUDITORIA"],
+                    plan_accion,
+                    responsable,
+                    fecha_limite,
+                    estado,
+                    ruta_evidencia
                 )
 
                 st.success(
