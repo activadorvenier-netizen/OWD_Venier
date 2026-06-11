@@ -5,3 +5,5 @@ plotly
 openpyxl
 sqlalchemy
 streamlit-option-menu
+psycopg2-binary
+sqlalchemy
