@@ -7,6 +7,12 @@ from pathlib import Path
 import os
 from sqlalchemy import create_engine
 import sqlite3
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseUpload
+
+import io
+import json
 
 # ------------------------------------------------
 # CONFIG APP
@@ -28,10 +34,40 @@ if "form_id" not in st.session_state:
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+if DATABASE_URL:
+    engine = create_engine(DATABASE_URL)
+else:
+    engine = None
+
 engine = create_engine(DATABASE_URL)
 
 pasta_fotos = Path("fotos_owd")
 pasta_fotos.mkdir(exist_ok=True)
+
+# ------------------------------------------------
+# GOOGLE DRIVE
+# ------------------------------------------------
+
+DRIVE_FOLDER_EVIDENCIAS = "1UMxoTzS2Av1-iCf9EBYYbUvoVVke5XA-"
+
+SCOPES = [
+    "https://www.googleapis.com/auth/drive"
+]
+
+google_creds = json.loads(
+    os.environ["GOOGLE_CREDENTIALS"]
+)
+
+creds = service_account.Credentials.from_service_account_info(
+    google_creds,
+    scopes=SCOPES
+)
+
+drive_service = build(
+    "drive",
+    "v3",
+    credentials=creds
+)
 
 # =========================================================
 # LEER TABLAS
@@ -138,6 +174,52 @@ def actualizar_pda_sql(
                 str(id_auditoria)
             )
         )
+
+# ------------------------------------------------
+# SUBIR EVIDENCIA A DRIVE
+# ------------------------------------------------
+
+def subir_evidencia_drive(
+    archivo,
+    nombre_archivo
+):
+
+    contenido = io.BytesIO(
+        archivo.getbuffer()
+    )
+
+    metadata = {
+        "name": nombre_archivo,
+        "parents": [
+            DRIVE_FOLDER_EVIDENCIAS
+        ]
+    }
+
+    media = MediaIoBaseUpload(
+        contenido,
+        mimetype=archivo.type,
+        resumable=False
+    )
+
+    archivo_drive = drive_service.files().create(
+        body=metadata,
+        media_body=media,
+        fields="id"
+    ).execute()
+
+    file_id = archivo_drive["id"]
+
+    drive_service.permissions().create(
+        fileId=file_id,
+        body={
+            "type": "anyone",
+            "role": "reader"
+        }
+    ).execute()
+
+    return (
+        f"https://drive.google.com/uc?id={file_id}"
+    )
 
 # ------------------------------------------------
 # LEER EXCEL
@@ -2566,10 +2648,7 @@ elif seleccion == "Planes de Acción":
                 help="Obligatorio para completar el Plan de Acción"
             )
 
-            if (
-                ruta_evidencia_actual != ""
-                and os.path.exists(ruta_evidencia_actual)
-            ):
+            if ruta_evidencia_actual != "":
 
                 st.image(
                     ruta_evidencia_actual,
@@ -2627,28 +2706,15 @@ elif seleccion == "Planes de Acción":
 
                 if evidencia is not None:
 
-                    carpeta_evidencias = "evidencias_pda"
-
-                    os.makedirs(
-                        carpeta_evidencias,
-                        exist_ok=True
-                    )
-
                     nombre_archivo = (
                         f"{fila['ID_AUDITORIA']}_"
                         f"{evidencia.name}"
                     )
 
-                    ruta_evidencia = os.path.join(
-                        carpeta_evidencias,
+                    ruta_evidencia = subir_evidencia_drive(
+                        evidencia,
                         nombre_archivo
                     )
-
-                    with open(ruta_evidencia, "wb") as f:
-
-                        f.write(
-                            evidencia.getbuffer()
-                        )
 
                 if estado != "Completado":
                     ruta_evidencia = ""
@@ -2934,7 +3000,7 @@ elif seleccion == "Historial":
             if st.session_state.confirmar_eliminacion:
 
                 st.warning(
-                    "⚠️ Pará Chapu!! ¿Estás seguro que querés eliminar la auditoría?"
+                    "⚠️ ¿Estás seguro que querés eliminar la auditoría?"
                 )
 
                 col_si, col_no = st.columns(2)
