@@ -2554,7 +2554,7 @@ elif seleccion == "Planes de Acción":
                 st.image(
                     ruta_evidencia_actual,
                     caption="Evidencia cargada",
-                    width=350
+                    width=700
                 )
 
             if evidencia is not None:
@@ -3340,8 +3340,6 @@ elif seleccion == "Historial":
                     st.divider()
 
                     st.subheader("📷 Evidencia Fotográfica")
-
-                st.write("Ruta foto:", foto_path)
 
                 try:
 
