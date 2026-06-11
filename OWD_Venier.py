@@ -3341,6 +3341,8 @@ elif seleccion == "Historial":
 
                     st.subheader("📷 Evidencia Fotográfica")
 
+                st.write("Ruta foto:", foto_path)
+
                 try:
 
                         st.image(
