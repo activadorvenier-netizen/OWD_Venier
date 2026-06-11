@@ -2187,7 +2187,7 @@ elif seleccion == "Planes de Acción":
 
         st.subheader("🔎 Filtros")
 
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4, col5 = st.columns(5)
 
         with col1:
 
@@ -2261,6 +2261,19 @@ elif seleccion == "Planes de Acción":
                 )
             )
 
+        with col5:
+
+            filtro_responsable = st.selectbox(
+                "Responsable",
+                ["Todos"] + sorted(
+                    df_planes["RESPONSABLE"]
+                    .dropna()
+                    .astype(str)
+                    .unique()
+                    .tolist()
+                )
+            )
+
         df_planes_filtrado = df_planes.copy()
 
         # ------------------------------------------------
@@ -2295,6 +2308,13 @@ elif seleccion == "Planes de Acción":
             df_planes_filtrado = df_planes_filtrado[
                 df_planes_filtrado["ESTADO"]
                 == filtro_estado
+            ]
+
+        if filtro_responsable != "Todos":
+
+            df_planes_filtrado = df_planes_filtrado[
+                df_planes_filtrado["RESPONSABLE"]
+                == filtro_responsable
             ]
 
         st.divider()
