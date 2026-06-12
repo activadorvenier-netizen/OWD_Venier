@@ -2601,9 +2601,6 @@ elif seleccion == "Planes de Acción":
                 key=f"evidencia_{fila['ID_AUDITORIA']}"
             )
 
-            st.write("ID Auditoría:", fila["ID_AUDITORIA"])
-            st.write("Evidencia actual:", ruta_evidencia_actual)
-
             if ruta_evidencia_actual != "":
 
                 try:
