@@ -410,8 +410,6 @@ if seleccion == "Nueva Auditoría":
 
                         st.divider()
 
-            
-
     except:
         pass
 
@@ -907,30 +905,10 @@ if seleccion == "Nueva Auditoría":
 
                 if foto_general is not None:
 
-                    carpeta_fotos = "fotos_owd"
-
-                    os.makedirs(
-                        carpeta_fotos,
-                        exist_ok=True
+                    foto_path = subir_imagen_cloudinary(
+                        foto_general,
+                        "auditorias"
                     )
-
-                    nombre_foto = (
-                        f"{id_auditoria}_"
-                        f"{foto_general.name}"
-                    )
-
-                    foto_path = os.path.join(
-                        carpeta_fotos,
-                        nombre_foto
-                    )
-
-                    with open(foto_path, "wb") as f:
-
-                        f.write(
-                            foto_general.getbuffer()
-                        )
-
-                datos_auditoria = []
 
                 # ------------------------------------------------
                 # CALCULO SCORE
@@ -3275,33 +3253,15 @@ elif seleccion == "Historial":
 
                     if nueva_foto is not None:
 
-                        carpeta_fotos = "fotos_owd"
-
-                        os.makedirs(
-                            carpeta_fotos,
-                            exist_ok=True
+                        nueva_url = subir_imagen_cloudinary(
+                            nueva_foto,
+                            "auditorias"
                         )
-
-                        nombre_foto = (
-                            f"{st.session_state['editar_id']}_"
-                            f"{nueva_foto.name}"
-                        )
-
-                        nueva_ruta = os.path.join(
-                            carpeta_fotos,
-                            nombre_foto
-                        )
-
-                        with open(nueva_ruta, "wb") as f:
-
-                            f.write(
-                                nueva_foto.getbuffer()
-                            )
 
                         df_original.loc[
                             mask,
                             "FOTO"
-                        ] = nueva_ruta
+                        ] = nueva_url
 
                     if eliminar_foto:
 
