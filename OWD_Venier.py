@@ -2617,6 +2617,10 @@ elif seleccion == "Planes de Acción":
                         "⚠️ La evidencia ya no está disponible."
                     )
 
+                eliminar_evidencia = st.checkbox(
+                    "🗑️ Eliminar evidencia actual"
+                )
+
             if evidencia is not None:
 
                 st.success(
@@ -2674,6 +2678,18 @@ elif seleccion == "Planes de Acción":
 
                 if estado != "Completado":
                     ruta_evidencia = ""
+
+                if eliminar_evidencia:
+
+                    ruta_evidencia = ""
+
+                    if estado == "Completado" and evidencia is None:
+
+                        st.error(
+                            "⚠️ Debe cargar una nueva evidencia o cambiar el estado."
+                        )
+
+                        st.stop()
 
                 actualizar_pda_sql(
                     fila["ID_AUDITORIA"],
