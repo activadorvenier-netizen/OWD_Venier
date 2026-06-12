@@ -7,9 +7,8 @@ from pathlib import Path
 import os
 from sqlalchemy import create_engine
 import sqlite3
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseUpload
+import cloudinary
+import cloudinary.uploader
 
 import io
 import json
@@ -34,11 +33,6 @@ if "form_id" not in st.session_state:
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-st.write(
-    "Google Credentials:",
-    os.getenv("GOOGLE_CREDENTIALS") is not None
-)
-
 if DATABASE_URL:
     engine = create_engine(DATABASE_URL)
 else:
@@ -49,29 +43,11 @@ engine = create_engine(DATABASE_URL)
 pasta_fotos = Path("fotos_owd")
 pasta_fotos.mkdir(exist_ok=True)
 
-# ------------------------------------------------
-# GOOGLE DRIVE
-# ------------------------------------------------
-
-DRIVE_FOLDER_EVIDENCIAS = "1UMxoTzS2Av1-iCf9EBYYbUvoVVke5XA-"
-
-SCOPES = [
-    "https://www.googleapis.com/auth/drive"
-]
-
-google_creds = json.loads(
-    os.environ["GOOGLE_CREDENTIALS"]
-)
-
-creds = service_account.Credentials.from_service_account_info(
-    google_creds,
-    scopes=SCOPES
-)
-
-drive_service = build(
-    "drive",
-    "v3",
-    credentials=creds
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    secure=True
 )
 
 # =========================================================
@@ -181,50 +157,21 @@ def actualizar_pda_sql(
         )
 
 # ------------------------------------------------
-# SUBIR EVIDENCIA A DRIVE
-# ------------------------------------------------
+# SUBIR IMAGEN A CLOUDINARY
+# # ------------------------------------------------
 
-def subir_evidencia_drive(
+def subir_imagen_cloudinary(
     archivo,
-    nombre_archivo
+    carpeta="owd_venier"
 ):
 
-    contenido = io.BytesIO(
-        archivo.getbuffer()
+    resultado = cloudinary.uploader.upload(
+        archivo,
+        folder=carpeta,
+        resource_type="image"
     )
 
-    metadata = {
-        "name": nombre_archivo,
-        "parents": [
-            DRIVE_FOLDER_EVIDENCIAS
-        ]
-    }
-
-    media = MediaIoBaseUpload(
-        contenido,
-        mimetype=archivo.type,
-        resumable=False
-    )
-
-    archivo_drive = drive_service.files().create(
-        body=metadata,
-        media_body=media,
-        fields="id"
-    ).execute()
-
-    file_id = archivo_drive["id"]
-
-    drive_service.permissions().create(
-        fileId=file_id,
-        body={
-            "type": "anyone",
-            "role": "reader"
-        }
-    ).execute()
-
-    return (
-        f"https://drive.google.com/uc?id={file_id}"
-    )
+    return resultado["secure_url"]
 
 # ------------------------------------------------
 # LEER EXCEL
@@ -2655,11 +2602,19 @@ elif seleccion == "Planes de Acción":
 
             if ruta_evidencia_actual != "":
 
-                st.image(
-                    ruta_evidencia_actual,
-                    caption="Evidencia cargada",
-                    width=700
-                )
+                try:
+
+                    st.image(
+                        ruta_evidencia_actual,
+                        caption="Evidencia cargada",
+                        width=700
+                    )
+
+                except:
+
+                    st.warning(
+                        "⚠️ La evidencia ya no está disponible."
+                    )
 
             if evidencia is not None:
 
@@ -2711,14 +2666,9 @@ elif seleccion == "Planes de Acción":
 
                 if evidencia is not None:
 
-                    nombre_archivo = (
-                        f"{fila['ID_AUDITORIA']}_"
-                        f"{evidencia.name}"
-                    )
-
-                    ruta_evidencia = subir_evidencia_drive(
+                    ruta_evidencia = subir_imagen_cloudinary(
                         evidencia,
-                        nombre_archivo
+                        "evidencias_pda"
                     )
 
                 if estado != "Completado":
