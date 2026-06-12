@@ -2597,8 +2597,12 @@ elif seleccion == "Planes de Acción":
             evidencia = st.file_uploader(
                 "📎 Evidencia de Cierre",
                 type=["jpg", "jpeg", "png"],
-                help="Obligatorio para completar el Plan de Acción"
+                help="Obligatorio para completar el Plan de Acción",
+                key=f"evidencia_{fila['ID_AUDITORIA']}"
             )
+
+            st.write("ID Auditoría:", fila["ID_AUDITORIA"])
+            st.write("Evidencia actual:", ruta_evidencia_actual)
 
             if ruta_evidencia_actual != "":
 
