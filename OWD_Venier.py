@@ -3,10 +3,8 @@ import pandas as pd
 import plotly.express as px
 from streamlit_option_menu import option_menu
 from datetime import datetime, date
-from pathlib import Path
 import os
 from sqlalchemy import create_engine
-import sqlite3
 import cloudinary
 import cloudinary.uploader
 
@@ -37,11 +35,6 @@ if DATABASE_URL:
     engine = create_engine(DATABASE_URL)
 else:
     engine = None
-
-engine = create_engine(DATABASE_URL)
-
-pasta_fotos = Path("fotos_owd")
-pasta_fotos.mkdir(exist_ok=True)
 
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
@@ -2886,6 +2879,51 @@ elif seleccion == "Historial":
         st.dataframe(
             df_filtrado,
             use_container_width=True
+        )
+
+        # ------------------------------------------------
+        # EXPORTAR EXCEL
+        # ------------------------------------------------
+
+        ids_filtrados = (
+            df_filtrado["ID_AUDITORIA"]
+            .astype(str)
+            .unique()
+            .tolist()
+        )
+
+        detalle_export = df_historial[
+            df_historial["ID_AUDITORIA"]
+            .astype(str)
+            .isin(ids_filtrados)
+        ]
+
+        buffer = io.BytesIO()
+
+        with pd.ExcelWriter(
+            buffer,
+            engine="openpyxl"
+        ) as writer:
+
+            df_filtrado.to_excel(
+                writer,
+                sheet_name="Resumen",
+                index=False
+            )
+
+            detalle_export.to_excel(
+                writer,
+                sheet_name="Detalle",
+                index=False
+            )
+
+        buffer.seek(0)
+
+        st.download_button(
+            label="📥 Exportar Excel",
+            data=buffer,
+            file_name=f"OWD_Historial_{datetime.now().strftime('%Y%m%d')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
         st.divider()
