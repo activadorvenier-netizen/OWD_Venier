@@ -3202,6 +3202,63 @@ elif seleccion == "Historial":
                     index=0 if valor_pda == "Si" else 1
                 )
 
+                plan_accion_editado = ""
+                responsable_editado = ""
+                fecha_limite_editada = None
+
+                if pda_editado == "Si":
+
+                    st.divider()
+
+                    plan_accion_actual = ""
+
+                    if not fila_pda.empty:
+
+                        plan_accion_actual = str(
+                            fila_pda.iloc[0]["PLAN_ACCION"]
+                        )
+
+                    plan_accion_editado = st.text_area(
+                        "Plan de Acción",
+                        value=plan_accion_actual
+                    )
+
+                    responsable_actual = ""
+
+                    if not fila_pda.empty:
+
+                        responsable_actual = str(
+                            fila_pda.iloc[0]["RESPONSABLE"]
+                        )
+
+                    responsable_editado = st.selectbox(
+                        "Responsable",
+                        [""] + lista_auditores,
+                        index=(
+                            ([""] + lista_auditores).index(responsable_actual)
+                            if responsable_actual in ([""] + lista_auditores)
+                            else 0
+                        )
+                    )
+
+                    fecha_actual = date.today()
+
+                    if (
+                        not fila_pda.empty
+                        and pd.notna(fila_pda.iloc[0]["FECHA_LIMITE"])
+                        and str(fila_pda.iloc[0]["FECHA_LIMITE"]) != ""
+                    ):
+
+                        fecha_actual = pd.to_datetime(
+                            fila_pda.iloc[0]["FECHA_LIMITE"]
+                        ).date()
+
+                    fecha_limite_editada = st.date_input(
+                        "Fecha Límite",
+                        value=fecha_actual,
+                        format="DD/MM/YYYY"
+                    )
+
                 st.divider()
 
                 observacion_editada = st.text_area(
@@ -3271,15 +3328,33 @@ elif seleccion == "Historial":
 
                         df_original.loc[
                             mask_pda,
-                            "ESTADO"
-                        ] = (
+                            "PLAN_ACCION"
+                        ] = plan_accion_editado
+
+                        df_original.loc[
+                            mask_pda,
+                            "RESPONSABLE"
+                        ] = responsable_editado
+
+                        df_original.loc[
+                            mask_pda,
+                            "FECHA_LIMITE"
+                        ] = str(fecha_limite_editada)
+
+                        if (
+                            str(
+                                df_original.loc[
+                                    mask_pda,
+                                    "ESTADO"
+                                ].iloc[0]
+                            ).strip()
+                            == ""
+                        ):
+
                             df_original.loc[
                                 mask_pda,
                                 "ESTADO"
-                            ]
-                            .replace("", "Pendiente")
-                            .fillna("Pendiente")
-                        )
+                            ] = "Pendiente"
 
                     if pda_editado == "No":
 
