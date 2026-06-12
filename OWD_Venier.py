@@ -985,75 +985,75 @@ if seleccion == "Nueva Auditoría":
 
                                 score_pregunta = 0
 
-                    datos_auditoria.append({
+                        datos_auditoria.append({
 
-                        "ID_AUDITORIA": id_auditoria,
+                            "ID_AUDITORIA": id_auditoria,
 
-                        "FECHA": fecha,
+                            "FECHA": fecha,
 
-                        "AUDITOR": ", ".join(auditor),
+                            "AUDITOR": ", ".join(auditor),
 
-                        "SECTOR": sector,
+                            "SECTOR": sector,
 
-                        "AREA": area,
+                            "AREA": area,
 
-                        "EMPRESA": empresa,
+                            "EMPRESA": empresa,
 
-                        "AUDITADO": auditado,
+                            "AUDITADO": auditado,
 
-                        "LOCALIDAD": localidad,
+                            "LOCALIDAD": localidad,
 
-                        "MOTIVO_OWD": motivo,
+                            "MOTIVO_OWD": motivo,
 
-                        "PROCESO": proceso,
+                            "PROCESO": proceso,
 
-                        "PILAR": (
-                            "GENERAL"
-                            if seccion_pregunta == "Preguntas Generales"
-                            else pilar
-                        ),
+                            "PILAR": (
+                                "GENERAL"
+                                if seccion_pregunta == "Preguntas Generales"
+                                else pilar
+                            ),
 
-                        "SECCION": seccion_pregunta,
+                            "SECCION": seccion_pregunta,
 
-                        "PREGUNTA": pregunta_texto,
+                            "PREGUNTA": pregunta_texto,
 
-                        "RESPUESTA": respuesta,
+                            "RESPUESTA": respuesta,
 
-                        "OBSERVACION": observacion,
+                            "OBSERVACION": observacion,
 
-                        "SCORE": score_pregunta,
+                            "SCORE": score_pregunta,
 
-                        "FOTO": foto_path,
+                            "FOTO": foto_path,
 
-                        "PLAN_ACCION": (
-                            plan_accion_valor
-                            if pregunta_texto == "Requiere Plan de Acción"
-                            and str(respuesta) == "Si"
-                            else ""
-                        ),
+                            "PLAN_ACCION": (
+                                plan_accion_valor
+                                if pregunta_texto == "Requiere Plan de Acción"
+                                and str(respuesta) == "Si"
+                                else ""
+                            ),
 
-                        "RESPONSABLE": (
-                            responsable_valor
-                            if pregunta_texto == "Requiere Plan de Acción"
-                            and str(respuesta) == "Si"
-                            else ""
-                        ),
+                            "RESPONSABLE": (
+                                responsable_valor
+                                if pregunta_texto == "Requiere Plan de Acción"
+                                and str(respuesta) == "Si"
+                                else ""
+                            ),
 
-                        "FECHA_LIMITE": (
-                            fecha_limite_valor
-                            if pregunta_texto == "Requiere Plan de Acción"
-                            and str(respuesta) == "Si"
-                            else ""
-                        ),
+                            "FECHA_LIMITE": (
+                                fecha_limite_valor
+                                if pregunta_texto == "Requiere Plan de Acción"
+                                and str(respuesta) == "Si"
+                                else ""
+                            ),
 
-                        "ESTADO": (
-                            "Pendiente"
-                            if pregunta_texto == "Requiere Plan de Acción"
-                            and str(respuesta) == "Si"
-                            else ""
-                        )
+                            "ESTADO": (
+                                "Pendiente"
+                                if pregunta_texto == "Requiere Plan de Acción"
+                                and str(respuesta) == "Si"
+                                else ""
+                            )
 
-                    })
+                        })
 
                 # ------------------------------------------------
                 # SCORE FINAL
@@ -2572,6 +2572,8 @@ elif seleccion == "Planes de Acción":
                 key=f"evidencia_{fila['ID_AUDITORIA']}"
             )
 
+            eliminar_evidencia = False
+
             if ruta_evidencia_actual != "":
 
                 try:
@@ -2579,7 +2581,7 @@ elif seleccion == "Planes de Acción":
                     st.image(
                         ruta_evidencia_actual,
                         caption="Evidencia cargada",
-                        width=700
+                        width=650
                     )
 
                 except:
@@ -3264,6 +3266,20 @@ elif seleccion == "Historial":
                         mask_pda,
                         "RESPUESTA"
                     ] = pda_editado
+
+                    if pda_editado == "Si":
+
+                        df_original.loc[
+                            mask_pda,
+                            "ESTADO"
+                        ] = (
+                            df_original.loc[
+                                mask_pda,
+                                "ESTADO"
+                            ]
+                            .replace("", "Pendiente")
+                            .fillna("Pendiente")
+                        )
 
                     if pda_editado == "No":
 
