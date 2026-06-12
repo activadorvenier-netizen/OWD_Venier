@@ -34,6 +34,11 @@ if "form_id" not in st.session_state:
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+st.write(
+    "Google Credentials:",
+    os.getenv("GOOGLE_CREDENTIALS") is not None
+)
+
 if DATABASE_URL:
     engine = create_engine(DATABASE_URL)
 else:
