@@ -3319,7 +3319,7 @@ elif seleccion == "Historial":
                             .str.strip()
                             .str.lower()
                             ==
-                            "requiere plan de acción"
+                            "Requiere Plan de Acción"
                         )
                     )
 
