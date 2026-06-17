@@ -3315,7 +3315,11 @@ elif seleccion == "Historial":
                         &
                         (
                             df_original["PREGUNTA"]
-                            == "Requiere Plan de Acción"
+                            .astype(str)
+                            .str.strip()
+                            .str.lower()
+                            ==
+                            "requiere plan de acción"
                         )
                     )
 
@@ -3341,15 +3345,20 @@ elif seleccion == "Historial":
                             "FECHA_LIMITE"
                         ] = str(fecha_limite_editada)
 
-                        if (
-                            str(
-                                df_original.loc[
-                                    mask_pda,
-                                    "ESTADO"
-                                ].iloc[0]
-                            ).strip()
-                            == ""
-                        ):
+                        estado_actual = df_original.loc[
+                            mask_pda,
+                            "ESTADO"
+                        ]
+
+                        if estado_actual.empty:
+
+                            st.error(
+                                "⚠️ No se encontró la fila 'Requiere Plan de Acción' para esta auditoría."
+                            )
+
+                            st.stop()
+
+                        if str(estado_actual.iloc[0]).strip() == "":
 
                             df_original.loc[
                                 mask_pda,
