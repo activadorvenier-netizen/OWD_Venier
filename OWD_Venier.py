@@ -3328,8 +3328,13 @@ elif seleccion == "Historial":
                             .str.strip()
                             .str.lower()
                             ==
-                            "Requiere Plan de Acción"
+                            "requiere plan de acción"
                         )
+                    )
+
+                    st.write(
+                        "Filas PDA encontradas:",
+                        mask_pda.sum()
                     )
 
                     df_original.loc[
@@ -3435,10 +3440,11 @@ elif seleccion == "Historial":
 
                 st.write(f"📅 Fecha: {info['FECHA']}")
                 st.write(f"👤 Auditado: {info['AUDITADO']}")
-                st.write(f"🏆 Pilar: {info['PILAR']}")
+                st.write(f"🏢 Localidad: {info['LOCALIDAD']}")
 
             with col2:
 
+                st.write(f"🏆 Pilar: {info['PILAR']}")
                 st.write(f"🏭 Proceso: {info['PROCESO']}")
                 
                 detalle["SCORE"] = pd.to_numeric(
