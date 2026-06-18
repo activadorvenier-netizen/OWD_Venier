@@ -3332,11 +3332,6 @@ elif seleccion == "Historial":
                         )
                     )
 
-                    st.write(
-                        "Filas PDA encontradas:",
-                        mask_pda.sum()
-                    )
-
                     df_original.loc[
                         mask_pda,
                         "RESPUESTA"
