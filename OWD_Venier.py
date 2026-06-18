@@ -3310,43 +3310,49 @@ elif seleccion == "Historial":
                     df_original.loc[mask, "MOTIVO_OWD"] = motivo_editado
                     df_original.loc[mask,"OBSERVACION"] = observacion_editada
 
-                    mask_pda = (
-                        mask
-                        &
-                        (
-                            df_original["PREGUNTA"]
-                            .astype(str)
-                            .str.strip()
-                            .str.lower()
-                            ==
-                            "Requiere Plan de Acción"
+                    fila_pda_original = df_original.loc[
+                        mask &
+                        df_original["PREGUNTA"].astype(str).str.contains(
+                            "plan de acción",
+                            case=False,
+                            na=False
                         )
-                    )
+                    ]
+
+                    if fila_pda_original.empty:
+
+                        st.error(
+                            "⚠️ No existe una fila de Plan de Acción en esta auditoría."
+                        )
+
+                        st.stop()
+
+                    indice_pda = fila_pda_original.index[0]
 
                     df_original.loc[
-                        mask_pda,
+                        indice_pda,
                         "RESPUESTA"
                     ] = pda_editado
 
                     if pda_editado == "Si":
 
                         df_original.loc[
-                            mask_pda,
+                            indice_pda,
                             "PLAN_ACCION"
                         ] = plan_accion_editado
 
                         df_original.loc[
-                            mask_pda,
+                            indice_pda,
                             "RESPONSABLE"
                         ] = responsable_editado
 
                         df_original.loc[
-                            mask_pda,
+                            indice_pda,
                             "FECHA_LIMITE"
                         ] = str(fecha_limite_editada)
 
                         estado_actual = df_original.loc[
-                            mask_pda,
+                            indice_pda,
                             "ESTADO"
                         ]
 
@@ -3361,29 +3367,29 @@ elif seleccion == "Historial":
                         if str(estado_actual.iloc[0]).strip() == "":
 
                             df_original.loc[
-                                mask_pda,
+                                indice_pda,
                                 "ESTADO"
                             ] = "Pendiente"
 
                     if pda_editado == "No":
 
                         df_original.loc[
-                            mask_pda,
+                            indice_pda,
                             "PLAN_ACCION"
                         ] = ""
 
                         df_original.loc[
-                            mask_pda,
+                            indice_pda,
                             "RESPONSABLE"
                         ] = ""
 
                         df_original.loc[
-                            mask_pda,
+                            indice_pda,
                             "FECHA_LIMITE"
                         ] = ""
 
                         df_original.loc[
-                            mask_pda,
+                            indice_pda,
                             "ESTADO"
                         ] = ""
 
