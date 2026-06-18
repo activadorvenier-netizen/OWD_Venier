@@ -970,9 +970,18 @@ if seleccion == "Nueva Auditoría":
 
                     score_pregunta = "None"
 
-                    if pregunta_texto not in preguntas_excluidas:
+                    if pregunta_texto not in [
+                        "Plan de Acción",
+                        "Responsable",
+                        "Fecha Limite"
+                    ]:
 
-                        if str(respuesta) in ["Si", "No"]:
+                        if (
+                            pregunta_texto not in [
+                                "Requiere Plan de Acción"
+                            ]
+                            and str(respuesta) in ["Si", "No"]
+                        ):
 
                             total_preguntas += 1
 
@@ -3310,86 +3319,74 @@ elif seleccion == "Historial":
                     df_original.loc[mask, "MOTIVO_OWD"] = motivo_editado
                     df_original.loc[mask,"OBSERVACION"] = observacion_editada
 
-                    fila_pda_original = df_original.loc[
-                        mask &
-                        df_original["PREGUNTA"].astype(str).str.contains(
-                            "plan de acción",
-                            case=False,
-                            na=False
+                    mask_pda = (
+                        mask
+                        &
+                        (
+                            df_original["PREGUNTA"]
+                            .astype(str)
+                            .str.strip()
+                            .str.lower()
+                            ==
+                            "Requiere Plan de Acción"
                         )
-                    ]
-
-                    if fila_pda_original.empty:
-
-                        st.error(
-                            "⚠️ No existe una fila de Plan de Acción en esta auditoría."
-                        )
-
-                        st.stop()
-
-                    indice_pda = fila_pda_original.index[0]
+                    )
 
                     df_original.loc[
-                        indice_pda,
+                        mask_pda,
                         "RESPUESTA"
                     ] = pda_editado
 
                     if pda_editado == "Si":
 
                         df_original.loc[
-                            indice_pda,
+                            mask_pda,
                             "PLAN_ACCION"
                         ] = plan_accion_editado
 
                         df_original.loc[
-                            indice_pda,
+                            mask_pda,
                             "RESPONSABLE"
                         ] = responsable_editado
 
                         df_original.loc[
-                            indice_pda,
+                            mask_pda,
                             "FECHA_LIMITE"
                         ] = str(fecha_limite_editada)
 
                         estado_actual = df_original.loc[
-                            indice_pda,
+                            mask_pda,
                             "ESTADO"
                         ]
 
-                        if estado_actual.empty:
+                        if len(estado_actual) > 0:
 
-                            st.error(
-                                "⚠️ No se encontró la fila 'Requiere Plan de Acción' para esta auditoría."
-                            )
+                            if str(estado_actual.iloc[0]).strip() == "":
 
-                            st.stop()
-
-                        if str(estado_actual.iloc[0]).strip() == "":
-
-                            df_original.loc[
-                                indice_pda,
-                                "ESTADO"
-                            ] = "Pendiente"
+                                df_original.loc[
+                                    mask_pda,
+                                    "ESTADO"
+                                ] = "Pendiente"
 
                     if pda_editado == "No":
 
                         df_original.loc[
-                            indice_pda,
+                            mask_pda,
                             "PLAN_ACCION"
                         ] = ""
 
                         df_original.loc[
-                            indice_pda,
+                            mask_pda,
                             "RESPONSABLE"
                         ] = ""
 
                         df_original.loc[
-                            indice_pda,
+                            mask_pda,
                             "FECHA_LIMITE"
                         ] = ""
 
                         df_original.loc[
-                            indice_pda,
+                            mask_pda,
                             "ESTADO"
                         ] = ""
 
