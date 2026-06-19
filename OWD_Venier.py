@@ -3390,6 +3390,52 @@ elif seleccion == "Historial":
                             "ESTADO"
                         ] = ""
 
+                        # ----------------------------------
+                        # LIMPIAR PREGUNTAS HIJAS DEL PDA
+                        # ----------------------------------
+
+                        mask_plan = (
+                            mask
+                            &
+                            (
+                                df_original["PREGUNTA"]
+                                == "Plan de Acción"
+                            )
+                        )
+
+                        mask_resp = (
+                            mask
+                            &
+                            (
+                                df_original["PREGUNTA"]
+                                == "Responsable"
+                            )
+                        )
+
+                        mask_fecha = (
+                            mask
+                            &
+                            (
+                                df_original["PREGUNTA"]
+                                == "Fecha Limite"
+                            )
+                        )
+
+                        df_original.loc[
+                            mask_plan,
+                            "RESPUESTA"
+                        ] = ""
+
+                        df_original.loc[
+                            mask_resp,
+                            "RESPUESTA"
+                        ] = ""
+
+                        df_original.loc[
+                            mask_fecha,
+                            "RESPUESTA"
+                        ] = ""
+
                     import os
 
                     if nueva_foto is not None:
