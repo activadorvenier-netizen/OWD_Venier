@@ -3532,7 +3532,7 @@ elif seleccion == "Historial":
                 foto_path = ""
 
                 fotos_validas = detalle[
-                        detalle["FOTO"].notna()
+                    detalle["FOTO"].notna()
                 ]
 
                 if not fotos_validas.empty:
@@ -3547,17 +3547,17 @@ elif seleccion == "Historial":
 
                     st.subheader("📷 Evidencia Fotográfica")
 
-                try:
+                    try:
 
                         st.image(
                             foto_path,
                             width=300
                         )
 
-                except:
+                    except:
 
                         st.warning(
-                            "No se pudo cargar la imagen."
+                            "⚠️ No se pudo cargar la imagen."
                         )
 
             # ------------------------------------------------
@@ -3569,7 +3569,21 @@ elif seleccion == "Historial":
             for _, fila in detalle.iterrows():
 
                 pregunta = str(fila["PREGUNTA"])
-                respuesta = str(fila["RESPUESTA"])
+                respuesta = str(fila["RESPUESTA"]).strip()
+
+                # --------------------------------------------
+                # OCULTAR PREGUNTAS PDA VACÍAS
+                # --------------------------------------------
+
+                if (
+                    pregunta in [
+                        "Plan de Acción",
+                        "Responsable",
+                        "Fecha Limite"
+                    ]
+                    and respuesta == ""
+                ):
+                    continue
 
                 if pregunta == "Requiere Plan de Acción":
 
