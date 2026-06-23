@@ -4112,7 +4112,7 @@ elif seleccion == "Maestros":
 # CALENDARIO
 # =========================================================
 
-if seleccion == "📅 Calendario":
+if seleccion == "Calendario":
 
     st.title("📅 Calendario OWD")
 
