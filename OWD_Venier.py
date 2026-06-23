@@ -4,14 +4,13 @@ import plotly.express as px
 from streamlit_option_menu import option_menu
 from datetime import datetime, date
 import os
+from streamlit_calendar import calendar
 from sqlalchemy import create_engine
 import cloudinary
 import cloudinary.uploader
 
 import io
 import json
-
-from streamlit_calendar import calendar
 
 # ------------------------------------------------
 # CONFIG APP
