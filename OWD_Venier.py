@@ -4180,7 +4180,7 @@ if seleccion == "Calendario":
         .tolist()
     )
 
-    auditor_filtro = col2.selectbox(
+    auditor_filtro = col1.selectbox(
         "Auditor",
         ["Todos"] + lista_auditores_cal
     )
@@ -4193,7 +4193,7 @@ if seleccion == "Calendario":
         .tolist()
     )
 
-    operario_filtro = col3.selectbox(
+    operario_filtro = col2.selectbox(
         "Auditado",
         ["Todos"] + lista_operarios
     )
@@ -4201,6 +4201,8 @@ if seleccion == "Calendario":
     # ------------------------------------------------
     # FILTRAR
     # ------------------------------------------------
+
+    df_filtrado = df_cal.copy()
 
     if auditor_filtro != "Todos":
 
@@ -4262,7 +4264,7 @@ if seleccion == "Calendario":
         eventos.append({
 
             "title":
-                f"{pilar} | {proceso}",
+                f"{pilar} - {proceso}",
 
             "start":
                 fecha.strftime("%Y-%m-%d"),
