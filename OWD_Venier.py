@@ -4171,21 +4171,7 @@ if seleccion == "Calendario":
     # FILTROS
     # ------------------------------------------------
 
-    col1, col2, col3 = st.columns(3)
-
-    lista_meses = sorted(
-        df_cal["Fecha Programacion"]
-        .dropna()
-        .dt.strftime("%Y-%m")
-        .unique()
-        .tolist()
-    )
-
-    mes_filtro = col1.selectbox(
-        "Mes",
-        lista_meses,
-        index=len(lista_meses)-1
-    )
+    col1, col2 = st.columns(2)
 
     lista_auditores_cal = sorted(
         df_cal["AUDITOR"]
@@ -4218,12 +4204,6 @@ if seleccion == "Calendario":
 
     df_filtrado = df_cal.copy()
 
-    df_filtrado = df_filtrado[
-        df_filtrado["Fecha Programacion"]
-        .dt.strftime("%Y-%m")
-        == mes_filtro
-    ]
-
     if auditor_filtro != "Todos":
 
         df_filtrado = df_filtrado[
@@ -4237,31 +4217,6 @@ if seleccion == "Calendario":
             df_filtrado["Operario"]
             == operario_filtro
         ]
-
-    # ------------------------------------------------
-    # COLORES POR PILAR
-    # ------------------------------------------------
-
-    colores = {
-
-        "Seguridad":
-            "#ef4444",
-
-        "Flota":
-            "#3b82f6",
-
-        "Gestión":
-            "#f59e0b",
-
-        "Almacén":
-            "#6b7280",
-
-        "Entrega":
-            "#8b5cf6",
-
-        "Planeamiento":
-            "#10b981"
-    }
 
     # ------------------------------------------------
     # EVENTOS CALENDARIO
@@ -4292,15 +4247,24 @@ if seleccion == "Calendario":
             row["Estado"]
         )
 
-        color = colores.get(
-            pilar,
-            "#6b7280"
-        )
+        estado = str(row["Estado"]).strip().upper()
+
+        if estado == "COMPLETADO":
+
+            color = "#22c55e"     # Verde
+
+        elif estado == "REPROGRAMAR":
+
+            color = "#ef4444"     # Rojo
+
+        else:
+
+            color = "#facc15"     # Amarillo (Programado)
 
         eventos.append({
 
             "title":
-                f"{pilar} | {estado}",
+                f"{pilar} | {proceso}",
 
             "start":
                 fecha.strftime("%Y-%m-%d"),
