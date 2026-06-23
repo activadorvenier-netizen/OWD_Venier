@@ -4202,8 +4202,6 @@ if seleccion == "Calendario":
     # FILTRAR
     # ------------------------------------------------
 
-    df_filtrado = df_cal.copy()
-
     if auditor_filtro != "Todos":
 
         df_filtrado = df_filtrado[
@@ -4249,7 +4247,7 @@ if seleccion == "Calendario":
 
         estado = str(row["Estado"]).strip().upper()
 
-        if estado == "COMPLETADO":
+        if estado == "COMPLETO":
 
             color = "#22c55e"     # Verde
 
@@ -4297,7 +4295,7 @@ if seleccion == "Calendario":
             "dayGridMonth",
 
         "height":
-            900,
+            800,
 
         "headerToolbar": {
 
