@@ -4247,19 +4247,19 @@ if seleccion == "Calendario":
         "Seguridad":
             "#ef4444",
 
-        "Calidad":
+        "Flota":
             "#3b82f6",
 
-        "Produccion":
+        "Gestión":
             "#f59e0b",
 
-        "Producción":
-            "#f59e0b",
+        "Almacén":
+            "#6b7280",
 
-        "People":
+        "Entrega":
             "#8b5cf6",
 
-        "Medio Ambiente":
+        "Planeamiento":
             "#10b981"
     }
 
