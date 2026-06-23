@@ -262,14 +262,16 @@ with st.sidebar:
             "Dashboard",
             "Planes de Acción",
             "Historial",
-            "Maestros"
+            "Maestros",
+            "Calendario"
         ],
         icons=[
             "clipboard-check",
             "bar-chart",
             "exclamation-triangle",
             "clock-history",
-            "gear"
+            "gear",
+            "calendar"
         ],
         default_index=0
     )
@@ -4105,3 +4107,239 @@ elif seleccion == "Maestros":
                     )
 
                     st.rerun()
+
+# =========================================================
+# CALENDARIO
+# =========================================================
+
+if seleccion == "📅 Calendario":
+
+    st.title("📅 Calendario OWD")
+
+    # ------------------------------------------------
+    # LEER GOOGLE SHEETS
+    # ------------------------------------------------
+
+    try:
+
+        url_sheet = (
+            "https://docs.google.com/spreadsheets/d/"
+            "15gt8H1fcmZSFAhQBCcOvlTopMXTIW6lFMYgXJi0BS6k"
+            "/export?format=csv&gid=0"
+        )
+
+        df_cal = pd.read_csv(url_sheet)
+
+    except Exception as e:
+
+        st.error(
+            f"No se pudo leer la planificación: {e}"
+        )
+
+        st.stop()
+
+    # ------------------------------------------------
+    # NORMALIZAR CAMPOS
+    # ------------------------------------------------
+
+    df_cal["Fecha Programacion"] = pd.to_datetime(
+        df_cal["Fecha Programacion"],
+        errors="coerce",
+        dayfirst=True
+    )
+
+    df_cal["PILAR"] = (
+        df_cal["Area"]
+        .astype(str)
+        .str.strip()
+    )
+
+    df_cal["PROCESO"] = (
+        df_cal["OWD a realizar"]
+        .astype(str)
+        .str.strip()
+    )
+
+    df_cal["AUDITOR"] = (
+        df_cal["Auditor 1"]
+        .astype(str)
+        .str.strip()
+    )
+
+    # ------------------------------------------------
+    # FILTROS
+    # ------------------------------------------------
+
+    col1, col2, col3 = st.columns(3)
+
+    lista_meses = sorted(
+        df_cal["Fecha Programacion"]
+        .dropna()
+        .dt.strftime("%Y-%m")
+        .unique()
+    )
+
+    mes = col1.selectbox(
+        "Mes",
+        lista_meses,
+        index=len(lista_meses)-1
+    )
+
+    lista_auditores = sorted(
+        df_cal["AUDITOR"]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+
+    auditor_filtro = col2.selectbox(
+        "Auditor",
+        ["Todos"] + lista_auditores
+    )
+
+    lista_operarios = sorted(
+        df_cal["Operario"]
+        .dropna()
+        .astype(str)
+        .unique()
+        .tolist()
+    )
+
+    operario_filtro = col3.selectbox(
+        "Operario",
+        ["Todos"] + lista_operarios
+    )
+
+    # ------------------------------------------------
+    # FILTRAR
+    # ------------------------------------------------
+
+    df_filtrado = df_cal.copy()
+
+    df_filtrado = df_filtrado[
+        df_filtrado["Fecha Programacion"]
+        .dt.strftime("%Y-%m")
+        == mes
+    ]
+
+    if auditor_filtro != "Todos":
+
+        df_filtrado = df_filtrado[
+            df_filtrado["AUDITOR"]
+            == auditor_filtro
+        ]
+
+    if operario_filtro != "Todos":
+
+        df_filtrado = df_filtrado[
+            df_filtrado["Operario"]
+            == operario_filtro
+        ]
+
+    # ------------------------------------------------
+    # COLORES POR PILAR
+    # ------------------------------------------------
+
+    colores = {
+
+        "Seguridad":
+            "#ef4444",
+
+        "Flota":
+            "#3b82f6",
+
+        "Gestión":
+            "#f59e0b",
+
+        "Planeamiento":
+            "#6b7280",
+
+        "Almacén":
+            "#10b981",
+
+        "Entrega":
+            "#8b5cf6"
+    }
+
+    # ------------------------------------------------
+    # RESUMEN
+    # ------------------------------------------------
+
+    st.info(
+        f"OWD planificadas: {len(df_filtrado)}"
+    )
+
+    st.divider()
+
+    # ------------------------------------------------
+    # EVENTOS
+    # ------------------------------------------------
+
+    if df_filtrado.empty:
+
+        st.warning(
+            "No existen OWD para los filtros seleccionados."
+        )
+
+    else:
+
+        df_filtrado = df_filtrado.sort_values(
+            "Fecha Programacion"
+        )
+
+        for _, row in df_filtrado.iterrows():
+
+            fecha = row["Fecha Programacion"]
+
+            pilar = str(
+                row["PILAR"]
+            )
+
+            proceso = str(
+                row["PROCESO"]
+            )
+
+            auditor = str(
+                row["AUDITOR"]
+            )
+
+            operario = str(
+                row["Operario"]
+            )
+
+            estado = str(
+                row["Estado"]
+            )
+
+            color = colores.get(
+                pilar,
+                "#6b7280"
+            )
+
+            st.markdown(
+                f"""
+                <div style="
+                    border-left:8px solid {color};
+                    background:#111827;
+                    padding:12px;
+                    margin-bottom:10px;
+                    border-radius:10px;
+                    color:white;
+                ">
+
+                <b>📅 {fecha.strftime('%d/%m/%Y')}</b><br>
+
+                🏭 <b>{pilar}</b><br>
+
+                ⚙️ {proceso}<br>
+
+                👤 Auditor: {auditor}<br>
+
+                👷 Operario: {operario}<br>
+
+                📌 Estado: {estado}
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
