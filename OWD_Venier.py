@@ -11,6 +11,8 @@ import cloudinary.uploader
 import io
 import json
 
+from streamlit_calendar import calendar
+
 # ------------------------------------------------
 # CONFIG APP
 # ------------------------------------------------
@@ -4120,19 +4122,26 @@ if seleccion == "Calendario":
     # LEER GOOGLE SHEETS
     # ------------------------------------------------
 
-    url_sheet = (
-        "https://docs.google.com/spreadsheets/d/"
-        "15gt8H1fcmZSFAhQBCcOvlTopMXTIW6lFMYgXJi0BS6k"
-        "/export?format=csv&gid=0"
-    )
+    try:
 
-    df_cal = pd.read_csv(url_sheet)
+        url_sheet = (
+            "https://docs.google.com/spreadsheets/d/"
+            "15gt8H1fcmZSFAhQBCcOvlTopMXTIW6lFMYgXJi0BS6k"
+            "/export?format=csv&gid=0"
+        )
 
-    st.write(df_cal.head())
-    st.write(df_cal.columns.tolist())
+        df_cal = pd.read_csv(url_sheet)
+
+    except Exception as e:
+
+        st.error(
+            f"Error al leer planificación: {e}"
+        )
+
+        st.stop()
 
     # ------------------------------------------------
-    # NORMALIZAR CAMPOS
+    # NORMALIZAR DATOS
     # ------------------------------------------------
 
     df_cal["Fecha Programacion"] = pd.to_datetime(
@@ -4142,7 +4151,7 @@ if seleccion == "Calendario":
     )
 
     df_cal["PILAR"] = (
-        df_cal["Area Operario"]
+        df_cal["Area"]
         .astype(str)
         .str.strip()
     )
@@ -4170,15 +4179,16 @@ if seleccion == "Calendario":
         .dropna()
         .dt.strftime("%Y-%m")
         .unique()
+        .tolist()
     )
 
-    mes = col1.selectbox(
+    mes_filtro = col1.selectbox(
         "Mes",
         lista_meses,
         index=len(lista_meses)-1
     )
 
-    lista_auditores = sorted(
+    lista_auditores_cal = sorted(
         df_cal["AUDITOR"]
         .dropna()
         .unique()
@@ -4187,7 +4197,7 @@ if seleccion == "Calendario":
 
     auditor_filtro = col2.selectbox(
         "Auditor",
-        ["Todos"] + lista_auditores
+        ["Todos"] + lista_auditores_cal
     )
 
     lista_operarios = sorted(
@@ -4199,7 +4209,7 @@ if seleccion == "Calendario":
     )
 
     operario_filtro = col3.selectbox(
-        "Operario",
+        "Auditado",
         ["Todos"] + lista_operarios
     )
 
@@ -4212,7 +4222,7 @@ if seleccion == "Calendario":
     df_filtrado = df_filtrado[
         df_filtrado["Fecha Programacion"]
         .dt.strftime("%Y-%m")
-        == mes
+        == mes_filtro
     ]
 
     if auditor_filtro != "Todos":
@@ -4238,101 +4248,124 @@ if seleccion == "Calendario":
         "Seguridad":
             "#ef4444",
 
-        "Flota":
+        "Calidad":
             "#3b82f6",
 
-        "Gestión":
+        "Produccion":
             "#f59e0b",
 
-        "Planeamiento":
-            "#6b7280",
+        "Producción":
+            "#f59e0b",
 
-        "Almacén":
-            "#10b981",
+        "People":
+            "#8b5cf6",
 
-        "Entrega":
-            "#8b5cf6"
+        "Medio Ambiente":
+            "#10b981"
     }
 
     # ------------------------------------------------
-    # RESUMEN
+    # EVENTOS CALENDARIO
     # ------------------------------------------------
 
-    st.info(
-        f"OWD planificadas: {len(df_filtrado)}"
+    eventos = []
+
+    for _, row in df_filtrado.iterrows():
+
+        if pd.isna(row["Fecha Programacion"]):
+            continue
+
+        fecha = row["Fecha Programacion"]
+
+        pilar = str(
+            row["PILAR"]
+        )
+
+        proceso = str(
+            row["PROCESO"]
+        )
+
+        auditor = str(
+            row["AUDITOR"]
+        )
+
+        estado = str(
+            row["Estado"]
+        )
+
+        color = colores.get(
+            pilar,
+            "#6b7280"
+        )
+
+        eventos.append({
+
+            "title":
+                f"{pilar} | {estado}",
+
+            "start":
+                fecha.strftime("%Y-%m-%d"),
+
+            "color":
+                color,
+
+            "extendedProps": {
+
+                "proceso":
+                    proceso,
+
+                "auditor":
+                    auditor,
+
+                "estado":
+                    estado
+            }
+        })
+
+    # ------------------------------------------------
+    # CONFIGURACIÓN CALENDARIO
+    # ------------------------------------------------
+
+    calendar_options = {
+
+        "locale": "es",
+
+        "initialView":
+            "dayGridMonth",
+
+        "height":
+            900,
+
+        "headerToolbar": {
+
+            "left":
+                "prev,next today",
+
+            "center":
+                "title",
+
+            "right":
+                "dayGridMonth,timeGridWeek"
+        },
+
+        "dayMaxEvents":
+            True,
+
+        "editable":
+            False
+    }
+
+    # ------------------------------------------------
+    # MOSTRAR CALENDARIO
+    # ------------------------------------------------
+
+    calendar(
+        events=eventos,
+        options=calendar_options
     )
 
     st.divider()
 
-    # ------------------------------------------------
-    # EVENTOS
-    # ------------------------------------------------
-
-    if df_filtrado.empty:
-
-        st.warning(
-            "No existen OWD para los filtros seleccionados."
-        )
-
-    else:
-
-        df_filtrado = df_filtrado.sort_values(
-            "Fecha Programacion"
-        )
-
-        for _, row in df_filtrado.iterrows():
-
-            fecha = row["Fecha Programacion"]
-
-            pilar = str(
-                row["PILAR"]
-            )
-
-            proceso = str(
-                row["PROCESO"]
-            )
-
-            auditor = str(
-                row["AUDITOR"]
-            )
-
-            operario = str(
-                row["Operario"]
-            )
-
-            estado = str(
-                row["Estado"]
-            )
-
-            color = colores.get(
-                pilar,
-                "#6b7280"
-            )
-
-            st.markdown(
-                f"""
-                <div style="
-                    border-left:8px solid {color};
-                    background:#111827;
-                    padding:12px;
-                    margin-bottom:10px;
-                    border-radius:10px;
-                    color:white;
-                ">
-
-                <b>📅 {fecha.strftime('%d/%m/%Y')}</b><br>
-
-                🏭 <b>{pilar}</b><br>
-
-                ⚙️ {proceso}<br>
-
-                👤 Auditor: {auditor}<br>
-
-                👷 Operario: {operario}<br>
-
-                📌 Estado: {estado}
-
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+    st.info(
+        f"📌 OWD planificadas: {len(df_filtrado)}"
+    )
