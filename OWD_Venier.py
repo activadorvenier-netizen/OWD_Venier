@@ -4120,23 +4120,16 @@ if seleccion == "📅 Calendario":
     # LEER GOOGLE SHEETS
     # ------------------------------------------------
 
-    try:
+    url_sheet = (
+        "https://docs.google.com/spreadsheets/d/"
+        "15gt8H1fcmZSFAhQBCcOvlTopMXTIW6lFMYgXJi0BS6k"
+        "/export?format=csv&gid=0"
+    )
 
-        url_sheet = (
-            "https://docs.google.com/spreadsheets/d/"
-            "15gt8H1fcmZSFAhQBCcOvlTopMXTIW6lFMYgXJi0BS6k"
-            "/export?format=csv&gid=0"
-        )
+    df_cal = pd.read_csv(url_sheet)
 
-        df_cal = pd.read_csv(url_sheet)
-
-    except Exception as e:
-
-        st.error(
-            f"No se pudo leer la planificación: {e}"
-        )
-
-        st.stop()
+    st.write(df_cal.head())
+    st.write(df_cal.columns.tolist())
 
     # ------------------------------------------------
     # NORMALIZAR CAMPOS
@@ -4149,7 +4142,7 @@ if seleccion == "📅 Calendario":
     )
 
     df_cal["PILAR"] = (
-        df_cal["Area"]
+        df_cal["Area Operario"]
         .astype(str)
         .str.strip()
     )
