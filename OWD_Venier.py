@@ -4319,7 +4319,7 @@ if seleccion == "Calendario":
             "right": "dayGridMonth,timeGridWeek"
         },
 
-        "dayMaxEvents": True,
+        "dayMaxEvents": 4,
 
         "editable": False
     }
@@ -4334,8 +4334,6 @@ if seleccion == "Calendario":
         key="calendario_owd"
     )
 
-    st.write(calendar_state)
-
     # ------------------------------------------------
     # DETALLE EVENTO
     # ------------------------------------------------
@@ -4349,38 +4347,42 @@ if seleccion == "Calendario":
 
         st.divider()
 
-        with st.expander(
-            "📋 Detalle OWD",
-            expanded=True
-        ):
 
-            st.write(
-                "**Pilar:**",
+        st.subheader("📋 Detalle OWD")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            st.metric(
+                "Pilar",
                 evento["extendedProps"]["pilar"]
             )
 
-            st.write(
-                "**Proceso:**",
+            st.metric(
+                "Proceso",
                 evento["extendedProps"]["proceso"]
             )
 
-            st.write(
-                "**Auditado:**",
+            st.metric(
+                "Auditado",
                 evento["extendedProps"]["operario"]
             )
 
-            st.write(
-                "**Auditor:**",
+        with col2:
+
+            st.metric(
+                "Auditor",
                 evento["extendedProps"]["auditor"]
             )
 
-            st.write(
-                "**Estado:**",
+            st.metric(
+                "Estado",
                 evento["extendedProps"]["estado"]
             )
 
-            st.write(
-                "**Fecha:**",
+            st.metric(
+                "Fecha",
                 evento["start"]
             )
 
