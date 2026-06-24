@@ -4263,27 +4263,33 @@ if seleccion == "Calendario":
 
         eventos.append({
 
-            "title":
-                f"{pilar} - {proceso}",
+    "title":
+        f"{pilar} - {proceso}",
 
-            "start":
-                fecha.strftime("%Y-%m-%d"),
+    "start":
+        fecha.strftime("%Y-%m-%d"),
 
-            "color":
-                color,
+    "color":
+        color,
 
-            "extendedProps": {
+    "extendedProps": {
 
-                "proceso":
-                    proceso,
+        "pilar":
+            pilar,
 
-                "auditor":
-                    auditor,
+        "proceso":
+            proceso,
 
-                "estado":
-                    estado
-            }
-        })
+        "operario":
+            str(row["Operario"]),
+
+        "auditor":
+            auditor,
+
+        "estado":
+            estado
+    }
+})
 
     # ------------------------------------------------
     # CONFIGURACIÓN CALENDARIO
@@ -4322,10 +4328,59 @@ if seleccion == "Calendario":
     # MOSTRAR CALENDARIO
     # ------------------------------------------------
 
-    calendar(
+    calendar_state = calendar(
         events=eventos,
-        options=calendar_options
+        options=calendar_options,
+        key="calendario_owd"
     )
+
+    # ------------------------------------------------
+    # DETALLE EVENTO
+    # ------------------------------------------------
+
+    if (
+        calendar_state
+        and "eventClick" in calendar_state
+    ):
+
+        evento = calendar_state["eventClick"]["event"]
+
+        st.divider()
+
+        with st.expander(
+            "📋 Detalle OWD",
+            expanded=True
+        ):
+
+            st.write(
+                "**Pilar:**",
+                evento["extendedProps"]["pilar"]
+            )
+
+            st.write(
+                "**Proceso:**",
+                evento["extendedProps"]["proceso"]
+            )
+
+            st.write(
+                "**Auditado:**",
+                evento["extendedProps"]["operario"]
+            )
+
+            st.write(
+                "**Auditor:**",
+                evento["extendedProps"]["auditor"]
+            )
+
+            st.write(
+                "**Estado:**",
+                evento["extendedProps"]["estado"]
+            )
+
+            st.write(
+                "**Fecha:**",
+                evento["start"]
+            )
 
     st.divider()
 
