@@ -4263,33 +4263,40 @@ if seleccion == "Calendario":
 
         eventos.append({
 
-    "title":
-        f"{pilar} - {proceso}",
+            "title":
+                f"{pilar} - {proceso}",
 
-    "start":
-        fecha.strftime("%Y-%m-%d"),
+            "start":
+                fecha.strftime("%Y-%m-%d"),
 
-    "color":
-        color,
+            "color":
+                color,
 
-    "extendedProps": {
+            "description":
+                f"""
+                Auditado: {row['Operario']}
+                Auditor: {auditor}
+                Estado: {estado}
+                """,
 
-        "pilar":
-            pilar,
+            "extendedProps": {
 
-        "proceso":
-            proceso,
+                "pilar":
+                    pilar,
 
-        "operario":
-            str(row["Operario"]),
+                "proceso":
+                    proceso,
 
-        "auditor":
-            auditor,
+                "operario":
+                    str(row["Operario"]),
 
-        "estado":
-            estado
-    }
-})
+                "auditor":
+                    auditor,
+
+                "estado":
+                    estado
+            }
+        })
 
     # ------------------------------------------------
     # CONFIGURACIÓN CALENDARIO
@@ -4299,29 +4306,32 @@ if seleccion == "Calendario":
 
         "locale": "es",
 
-        "initialView":
-            "dayGridMonth",
+        "initialView": "dayGridMonth",
 
-        "height":
-            800,
+        "height": 800,
 
         "headerToolbar": {
 
-            "left":
-                "prev,next today",
+            "left": "prev,next today",
 
-            "center":
-                "title",
+            "center": "title",
 
-            "right":
-                "dayGridMonth,timeGridWeek"
+            "right": "dayGridMonth,timeGridWeek"
         },
 
-        "dayMaxEvents":
-            True,
+        "dayMaxEvents": True,
 
-        "editable":
-            False
+        "editable": False,
+
+        "eventDidMount": """
+        function(info) {
+            info.el.title =
+                info.event.title + '\\n' +
+                info.event.extendedProps.operario + '\\n' +
+                info.event.extendedProps.auditor + '\\n' +
+                info.event.extendedProps.estado;
+        }
+        """
     }
 
     # ------------------------------------------------
@@ -4382,8 +4392,8 @@ if seleccion == "Calendario":
                 evento["start"]
             )
 
-    st.divider()
-
     st.info(
         f"📌 OWD planificadas: {len(df_filtrado)}"
     )
+
+    st.divider()
