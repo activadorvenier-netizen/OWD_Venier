@@ -4321,17 +4321,7 @@ if seleccion == "Calendario":
 
         "dayMaxEvents": True,
 
-        "editable": False,
-
-        "eventDidMount": """
-        function(info) {
-            info.el.title =
-                info.event.title + '\\n' +
-                info.event.extendedProps.operario + '\\n' +
-                info.event.extendedProps.auditor + '\\n' +
-                info.event.extendedProps.estado;
-        }
-        """
+        "editable": False
     }
 
     # ------------------------------------------------
@@ -4343,6 +4333,8 @@ if seleccion == "Calendario":
         options=calendar_options,
         key="calendario_owd"
     )
+
+    st.write(calendar_state)
 
     # ------------------------------------------------
     # DETALLE EVENTO
