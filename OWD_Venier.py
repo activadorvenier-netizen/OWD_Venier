@@ -4345,49 +4345,40 @@ if seleccion == "Calendario":
 
         evento = calendar_state["eventClick"]["event"]
 
-        st.divider()
-
-
         st.subheader("📋 Detalle OWD")
 
         col1, col2 = st.columns(2)
 
         with col1:
 
-            st.metric(
-                "Pilar",
-                evento["extendedProps"]["pilar"]
+            st.markdown(
+                f"<div style='font-size:14px'><b>Pilar:</b> {evento['extendedProps']['pilar']}</div>",
+                unsafe_allow_html=True
             )
 
-            st.metric(
-                "Proceso",
-                evento["extendedProps"]["proceso"]
+            st.markdown(
+                f"<div style='font-size:14px'><b>Proceso:</b> {evento['extendedProps']['proceso']}</div>",
+                unsafe_allow_html=True
             )
 
-            st.metric(
-                "Auditado",
-                evento["extendedProps"]["operario"]
+            st.markdown(
+                f"<div style='font-size:14px'><b>Auditado:</b> {evento['extendedProps']['operario']}</div>",
+                unsafe_allow_html=True
             )
 
         with col2:
 
-            st.metric(
-                "Auditor",
-                evento["extendedProps"]["auditor"]
+            st.markdown(
+                f"<div style='font-size:14px'><b>Auditor:</b> {evento['extendedProps']['auditor']}</div>",
+                unsafe_allow_html=True
             )
 
-            st.metric(
-                "Estado",
-                evento["extendedProps"]["estado"]
+            st.markdown(
+                f"<div style='font-size:14px'><b>Estado:</b> {evento['extendedProps']['estado']}</div>",
+                unsafe_allow_html=True
             )
 
-            st.metric(
-                "Fecha",
-                evento["start"]
+            st.markdown(
+                f"<div style='font-size:14px'><b>Fecha:</b> {evento['start']}</div>",
+                unsafe_allow_html=True
             )
-
-    st.info(
-        f"📌 OWD planificadas: {len(df_filtrado)}"
-    )
-
-    st.divider()
