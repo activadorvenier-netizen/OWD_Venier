@@ -4347,36 +4347,32 @@ if seleccion == "Calendario":
 
         st.subheader("📋 Detalle OWD")
 
-        col1 = st.columns(1)
+        st.markdown(
+            f"<div style='font-size:15px'><b>Fecha:</b> {evento['start']}</div>",
+            unsafe_allow_html=True
+        )
 
-        with col1:
+        st.markdown(
+            f"<div style='font-size:15px'><b>Auditor:</b> {evento['extendedProps']['auditor']}</div>",
+            unsafe_allow_html=True
+        )
 
-            st.markdown(
-                f"<div style='font-size:15px'><b>Fecha:</b> {evento['start']}</div>",
-                unsafe_allow_html=True
-            )
+        st.markdown(
+            f"<div style='font-size:15px'><b>Pilar:</b> {evento['extendedProps']['pilar']}</div>",
+            unsafe_allow_html=True
+        )
 
-            st.markdown(
-                f"<div style='font-size:15px'><b>Auditor:</b> {evento['extendedProps']['auditor']}</div>",
-                unsafe_allow_html=True
-            )
+        st.markdown(
+            f"<div style='font-size:15px'><b>Proceso:</b> {evento['extendedProps']['proceso']}</div>",
+            unsafe_allow_html=True
+        )
 
-            st.markdown(
-                f"<div style='font-size:15px'><b>Pilar:</b> {evento['extendedProps']['pilar']}</div>",
-                unsafe_allow_html=True
-            )
+        st.markdown(
+            f"<div style='font-size:15px'><b>Auditado:</b> {evento['extendedProps']['operario']}</div>",
+            unsafe_allow_html=True
+        )
 
-            st.markdown(
-                f"<div style='font-size:15px'><b>Proceso:</b> {evento['extendedProps']['proceso']}</div>",
-                unsafe_allow_html=True
-            )
-
-            st.markdown(
-                f"<div style='font-size:15px'><b>Auditado:</b> {evento['extendedProps']['operario']}</div>",
-                unsafe_allow_html=True
-            )
-
-            st.markdown(
-                f"<div style='font-size:15px'><b>Estado:</b> {evento['extendedProps']['estado']}</div>",
-                unsafe_allow_html=True
-            )      
+        st.markdown(
+            f"<div style='font-size:15px'><b>Estado:</b> {evento['extendedProps']['estado']}</div>",
+            unsafe_allow_html=True
+        )      
