@@ -4379,11 +4379,11 @@ if seleccion == "Calendario":
 
         st.divider()
 
-        st.info(
-            "📄 La planificación del calendario se administra desde Google Sheets."
-        )
+    st.info(
+        "📄 La planificación del calendario se administra desde Google Sheets."
+    )
 
-        st.link_button(
-            "🔗 Abrir Planificación OWD",
-            "https://docs.google.com/spreadsheets/d/15gt8H1fcmZSFAhQBCcOvlTopMXTIW6lFMYgXJi0BS6k/edit?gid=0#gid=0"
-        )
+    st.link_button(
+        "🔗 Abrir Planificación OWD",
+        "https://docs.google.com/spreadsheets/d/15gt8H1fcmZSFAhQBCcOvlTopMXTIW6lFMYgXJi0BS6k/edit?gid=0#gid=0"
+    )
