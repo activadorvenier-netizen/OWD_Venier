@@ -4347,38 +4347,36 @@ if seleccion == "Calendario":
 
         st.subheader("📋 Detalle OWD")
 
-        col1, col2 = st.columns(2)
+        col1 = st.columns(1)
 
         with col1:
 
             st.markdown(
-                f"<div style='font-size:14px'><b>Pilar:</b> {evento['extendedProps']['pilar']}</div>",
+                f"<div style='font-size:15px'><b>Fecha:</b> {evento['start']}</div>",
                 unsafe_allow_html=True
             )
 
             st.markdown(
-                f"<div style='font-size:14px'><b>Proceso:</b> {evento['extendedProps']['proceso']}</div>",
+                f"<div style='font-size:15px'><b>Auditor:</b> {evento['extendedProps']['auditor']}</div>",
                 unsafe_allow_html=True
             )
 
             st.markdown(
-                f"<div style='font-size:14px'><b>Auditado:</b> {evento['extendedProps']['operario']}</div>",
-                unsafe_allow_html=True
-            )
-
-        with col2:
-
-            st.markdown(
-                f"<div style='font-size:14px'><b>Auditor:</b> {evento['extendedProps']['auditor']}</div>",
+                f"<div style='font-size:15px'><b>Pilar:</b> {evento['extendedProps']['pilar']}</div>",
                 unsafe_allow_html=True
             )
 
             st.markdown(
-                f"<div style='font-size:14px'><b>Estado:</b> {evento['extendedProps']['estado']}</div>",
+                f"<div style='font-size:15px'><b>Proceso:</b> {evento['extendedProps']['proceso']}</div>",
                 unsafe_allow_html=True
             )
 
             st.markdown(
-                f"<div style='font-size:14px'><b>Fecha:</b> {evento['start']}</div>",
+                f"<div style='font-size:15px'><b>Auditado:</b> {evento['extendedProps']['operario']}</div>",
                 unsafe_allow_html=True
             )
+
+            st.markdown(
+                f"<div style='font-size:15px'><b>Estado:</b> {evento['extendedProps']['estado']}</div>",
+                unsafe_allow_html=True
+            )      
