@@ -884,6 +884,41 @@ if seleccion == "Nueva Auditoría":
 
             else:
 
+                # ------------------------------------------------
+                # VALIDAR RESPONSABLE OBLIGATORIO SI HAY PDA
+                # ------------------------------------------------
+
+                requiere_pda = False
+                responsable_valor = ""
+
+                for pregunta_id, respuesta in respuestas.items():
+
+                    pregunta_info = df_preguntas[
+                        df_preguntas["ID"] == pregunta_id
+                    ]
+
+                    if pregunta_info.empty:
+                        continue
+
+                    pregunta_texto = pregunta_info.iloc[0]["PREGUNTA"]
+
+                    if (
+                        pregunta_texto == "Requiere Plan de Acción"
+                        and str(respuesta) == "Si"
+                    ):
+                        requiere_pda = True
+
+                    elif pregunta_texto == "Responsable":
+                        responsable_valor = str(respuesta).strip()
+
+                if requiere_pda and responsable_valor == "":
+
+                    st.error(
+                        "⚠️ Debe seleccionar un Responsable cuando se requiere un Plan de Acción."
+                    )
+
+                    st.stop()
+
                 from datetime import datetime
                 import os
 
