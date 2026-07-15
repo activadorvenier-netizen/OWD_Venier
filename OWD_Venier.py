@@ -1266,7 +1266,7 @@ elif seleccion == "Dashboard":
             .dt.strftime("%m-%Y")
         )
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
 
         # ------------------------------------------------
         # FILTRO MES
@@ -1338,6 +1338,26 @@ elif seleccion == "Dashboard":
             )
 
         # ------------------------------------------------
+        # FILTRO AUDITOR
+        # ------------------------------------------------
+
+        with col4:
+
+            lista_auditores_dashboard = ["Todos"] + sorted(
+                df_dashboard["AUDITOR"]
+                .dropna()
+                .astype(str)
+                .unique()
+                .tolist()
+            )
+
+            auditor_seleccionado = st.selectbox(
+                "🕵️ Filtrar por Auditor",
+                lista_auditores_dashboard,
+                index=0
+            )
+
+        # ------------------------------------------------
         # APLICAR FILTROS
         # ------------------------------------------------
 
@@ -1368,6 +1388,15 @@ elif seleccion == "Dashboard":
             df_dashboard_filtrado = df_dashboard_filtrado[
                 df_dashboard_filtrado["AUDITADO"]
                 == auditado_seleccionado
+            ]
+
+        # FILTRO AUDITOR
+
+        if auditor_seleccionado != "Todos":
+
+            df_dashboard_filtrado = df_dashboard_filtrado[
+                df_dashboard_filtrado["AUDITOR"]
+                == auditor_seleccionado
             ]
 
         # ------------------------------------------------
@@ -2771,6 +2800,7 @@ elif seleccion == "Historial":
             .agg({
                 "FECHA": "first",
                 "AUDITADO": "first",
+                "AUDITOR": "first",
                 "PILAR": "first",
                 "PROCESO": "first",
                 "SCORE": "mean"
@@ -2781,6 +2811,7 @@ elif seleccion == "Historial":
             [
                 "ID_AUDITORIA",
                 "FECHA",
+                "AUDITOR",
                 "AUDITADO",
                 "PILAR",
                 "PROCESO",
