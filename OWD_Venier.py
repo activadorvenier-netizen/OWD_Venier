@@ -566,6 +566,27 @@ if seleccion == "Nueva Auditoría":
 
     df_preguntas = leer_sql("PREGUNTAS")
 
+    # Normalizar columnas
+    df_preguntas["PROCESO_ID"] = (
+        pd.to_numeric(
+            df_preguntas["PROCESO_ID"],
+            errors="coerce"
+        )
+    )
+
+    df_preguntas["ACTIVA"] = (
+        df_preguntas["ACTIVA"]
+        .astype(str)
+        .str.strip()
+        .str.upper()
+    )
+
+    df_preguntas["SECCION"] = (
+        df_preguntas["SECCION"]
+        .astype(str)
+        .str.strip()
+    )
+
     respuestas = {}
 
     # ------------------------------------------------
@@ -574,59 +595,91 @@ if seleccion == "Nueva Auditoría":
 
     if proceso != "":
 
-        proceso_id = df_procesos[
-            df_procesos["PROCESO"].astype(str).str.strip()
-            == str(proceso).strip()
-        ]["ID"].values[0]
-
-        # Normalizar datos para evitar problemas de tipos
-        df_preguntas["PROCESO_ID"] = (
-            df_preguntas["PROCESO_ID"]
+        # Obtener ID del proceso seleccionado
+        proceso_seleccionado = df_procesos[
+            df_procesos["PROCESO"]
             .astype(str)
             .str.strip()
+            ==
+            str(proceso).strip()
+        ]
+
+        if proceso_seleccionado.empty:
+
+            st.error(
+                "No se encontró el proceso seleccionado en la tabla de procesos."
+            )
+
+            st.stop()
+
+        proceso_id = pd.to_numeric(
+            proceso_seleccionado.iloc[0]["ID"],
+            errors="coerce"
         )
 
-        df_preguntas["SECCION"] = (
-            df_preguntas["SECCION"]
-            .astype(str)
-            .str.strip()
-        )
-
-        df_preguntas["ACTIVA"] = (
-            df_preguntas["ACTIVA"]
-            .astype(str)
-            .str.strip()
-        )
-
-        proceso_id = str(proceso_id).strip()
+        # ------------------------------------------------
+        # PREGUNTAS DEL PROCESO + PREGUNTAS GENERALES
+        # ------------------------------------------------
 
         preguntas_proceso = df_preguntas[
             (
-                (df_preguntas["PROCESO_ID"] == proceso_id)
+                (
+                    df_preguntas["PROCESO_ID"]
+                    == proceso_id
+                )
                 |
-                (df_preguntas["SECCION"] == "Preguntas Generales")
+                (
+                    df_preguntas["SECCION"]
+                    .str.strip()
+                    .str.lower()
+                    == "preguntas generales"
+                )
             )
             &
-            (df_preguntas["ACTIVA"].str.upper() == "SI")
-        ]
+            (
+                df_preguntas["ACTIVA"]
+                == "SI"
+            )
+        ].copy()
+
+        # ------------------------------------------------
+        # ORDENAR POR ID
+        # ------------------------------------------------
+
+        preguntas_proceso = preguntas_proceso.sort_values(
+            by="ID"
+        )
+
+        # ------------------------------------------------
+        # MOSTRAR POR SECCIÓN
+        # ------------------------------------------------
 
         secciones = preguntas_proceso[
             "SECCION"
-        ].unique()
+        ].drop_duplicates().tolist()
 
         for seccion in secciones:
 
-            st.subheader(f"📂 {seccion}")
+            st.subheader(
+                f"📂 {seccion}"
+            )
 
             preguntas_seccion = preguntas_proceso[
-            preguntas_proceso["SECCION"] == seccion
+                preguntas_proceso["SECCION"]
+                == seccion
             ]
 
             for _, fila in preguntas_seccion.iterrows():
 
                 pregunta_id = fila["ID"]
-                pregunta = fila["PREGUNTA"]
-                tipo = str(fila["TIPO"]).upper()
+
+                pregunta = str(
+                    fila["PREGUNTA"]
+                )
+
+                tipo = str(
+                    fila["TIPO"]
+                ).strip().upper()
 
                 visible_si = str(
                     fila["VISIBLE_SI"]
@@ -638,13 +691,17 @@ if seleccion == "Nueva Auditoría":
                 # VISIBILIDAD CONDICIONAL
                 # ------------------------------------------------
 
-                if visible_si != "nan":
+                if (
+                    visible_si != "nan"
+                    and visible_si != ""
+                    and visible_si.lower() != "none"
+                ):
 
                     try:
 
-                        condicion = visible_si.replace(
-                            " ",
-                            ""
+                        condicion = (
+                            visible_si
+                            .replace(" ", "")
                         )
 
                         pregunta_condicional = (
@@ -656,20 +713,21 @@ if seleccion == "Nueva Auditoría":
                         )
 
                         id_condicional = int(
-                            pregunta_condicional.replace(
-                                "P",
-                                ""
-                            )
+                            pregunta_condicional
+                            .replace("P", "")
                         )
 
-                        respuesta_anterior = respuestas.get(
-                            id_condicional
+                        respuesta_anterior = (
+                            respuestas.get(
+                                id_condicional
+                            )
                         )
 
                         if (
                             str(respuesta_anterior)
                             != valor_condicional
                         ):
+
                             mostrar = False
 
                     except:
@@ -684,13 +742,16 @@ if seleccion == "Nueva Auditoría":
 
                     respuesta = None
 
+                    # ------------------------------------------------
                     # RADIO
+                    # ------------------------------------------------
 
                     if tipo == "RADIO":
 
                         opciones = [""] + (
-                            str(fila["OPCIONES"])
-                            .split("|")
+                            str(
+                                fila["OPCIONES"]
+                            ).split("|")
                         )
 
                         respuesta = st.radio(
@@ -698,25 +759,36 @@ if seleccion == "Nueva Auditoría":
                             opciones,
                             horizontal=True,
                             index=0,
-                            key=f"{st.session_state.form_id}_pregunta_{pregunta_id}"
+                            key=(
+                                f"{st.session_state.form_id}"
+                                f"_pregunta_{pregunta_id}"
+                            )
                         )
 
+                    # ------------------------------------------------
                     # SELECT
+                    # ------------------------------------------------
 
                     elif tipo == "SELECT":
 
                         opciones = (
-                            str(fila["OPCIONES"])
-                            .split("|")
+                            str(
+                                fila["OPCIONES"]
+                            ).split("|")
                         )
 
                         respuesta = st.selectbox(
                             pregunta,
                             [""] + opciones,
-                            key=f"{st.session_state.form_id}_pregunta_{pregunta_id}"
+                            key=(
+                                f"{st.session_state.form_id}"
+                                f"_pregunta_{pregunta_id}"
+                            )
                         )
 
+                    # ------------------------------------------------
                     # TEXTO
+                    # ------------------------------------------------
 
                     elif tipo == "TEXTO":
 
@@ -725,41 +797,62 @@ if seleccion == "Nueva Auditoría":
                             respuesta = st.selectbox(
                                 pregunta,
                                 [""] + lista_auditores,
-                                key=f"{st.session_state.form_id}_pregunta_{pregunta_id}"
+                                key=(
+                                    f"{st.session_state.form_id}"
+                                    f"_pregunta_{pregunta_id}"
+                                )
                             )
 
                         else:
 
                             respuesta = st.text_area(
                                 pregunta,
-                                key=f"{st.session_state.form_id}_pregunta_{pregunta_id}"
+                                key=(
+                                    f"{st.session_state.form_id}"
+                                    f"_pregunta_{pregunta_id}"
+                                )
                             )
 
+                    # ------------------------------------------------
                     # NUMERO
+                    # ------------------------------------------------
 
                     elif tipo == "NUMERO":
 
                         respuesta = st.number_input(
                             pregunta,
-                            key=f"{st.session_state.form_id}_pregunta_{pregunta_id}"
+                            key=(
+                                f"{st.session_state.form_id}"
+                                f"_pregunta_{pregunta_id}"
+                            )
                         )
 
+                    # ------------------------------------------------
                     # FECHA
+                    # ------------------------------------------------
 
                     elif tipo == "FECHA":
 
                         respuesta = st.date_input(
                             pregunta,
-                            key=f"{st.session_state.form_id}_pregunta_{pregunta_id}"
+                            key=(
+                                f"{st.session_state.form_id}"
+                                f"_pregunta_{pregunta_id}"
+                            )
                         )
 
+                    # ------------------------------------------------
                     # FOTO
+                    # ------------------------------------------------
 
                     elif tipo == "FOTO":
 
                         respuesta = st.camera_input(
                             pregunta,
-                            key=f"{st.session_state.form_id}_pregunta_{pregunta_id}"
+                            key=(
+                                f"{st.session_state.form_id}"
+                                f"_pregunta_{pregunta_id}"
+                            )
                         )
 
                     respuestas[pregunta_id] = respuesta
