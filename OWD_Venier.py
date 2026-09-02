@@ -575,8 +575,30 @@ if seleccion == "Nueva Auditoría":
     if proceso != "":
 
         proceso_id = df_procesos[
-            df_procesos["PROCESO"] == proceso
+            df_procesos["PROCESO"].astype(str).str.strip()
+            == str(proceso).strip()
         ]["ID"].values[0]
+
+        # Normalizar datos para evitar problemas de tipos
+        df_preguntas["PROCESO_ID"] = (
+            df_preguntas["PROCESO_ID"]
+            .astype(str)
+            .str.strip()
+        )
+
+        df_preguntas["SECCION"] = (
+            df_preguntas["SECCION"]
+            .astype(str)
+            .str.strip()
+        )
+
+        df_preguntas["ACTIVA"] = (
+            df_preguntas["ACTIVA"]
+            .astype(str)
+            .str.strip()
+        )
+
+        proceso_id = str(proceso_id).strip()
 
         preguntas_proceso = df_preguntas[
             (
@@ -584,7 +606,8 @@ if seleccion == "Nueva Auditoría":
                 |
                 (df_preguntas["SECCION"] == "Preguntas Generales")
             )
-            &                (df_preguntas["ACTIVA"] == "Si")
+            &
+            (df_preguntas["ACTIVA"].str.upper() == "SI")
         ]
 
         secciones = preguntas_proceso[
