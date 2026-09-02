@@ -189,11 +189,14 @@ lista_pilares = [""] + sorted(
     df_pilares[
         df_pilares["PILAR"]
         .astype(str)
+        .str.strip()
         .str.upper()
         != "GENERAL"
     ]["PILAR"]
     .dropna()
     .astype(str)
+    .str.strip()
+    .unique()
     .tolist()
 )
 
