@@ -3920,9 +3920,11 @@ elif seleccion == "Maestros":
                 )
 
                 lista_pilares = sorted(
-                    df_procesos["PILAR"]
+                    df_pilares["PILAR"]
                     .dropna()
                     .astype(str)
+                    .str.strip()
+                    .loc[lambda x: x != ""]
                     .unique()
                     .tolist()
                 )
