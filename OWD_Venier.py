@@ -642,11 +642,20 @@ if seleccion == "Nueva Auditoría":
         ].copy()
 
         # ------------------------------------------------
-        # ORDENAR POR ID
+        # ORDENAR PREGUNTAS
+        # PROCESO PRIMERO - GENERALES DESPUÉS
         # ------------------------------------------------
 
+        preguntas_proceso["_ORDEN_SECCION"] = (
+            preguntas_proceso["SECCION"]
+            .str.strip()
+            .str.lower()
+            .eq("preguntas generales")
+            .astype(int)
+        )
+
         preguntas_proceso = preguntas_proceso.sort_values(
-            by="ID"
+            by=["_ORDEN_SECCION", "ID"]
         )
 
         # ------------------------------------------------
