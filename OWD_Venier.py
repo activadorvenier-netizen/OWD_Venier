@@ -186,16 +186,12 @@ df_pilares = leer_sql("PILARES")
 # ------------------------------------------------
 
 lista_pilares = [""] + sorted(
-    df_pilares[
-        df_pilares["PILAR"]
-        .astype(str)
-        .str.strip()
-        .str.upper()
-        != "GENERAL"
-    ]["PILAR"]
+    df_pilares["PILAR"]
     .dropna()
     .astype(str)
     .str.strip()
+    .loc[lambda x: x != ""]
+    .loc[lambda x: x.str.upper() != "GENERAL"]
     .unique()
     .tolist()
 )
