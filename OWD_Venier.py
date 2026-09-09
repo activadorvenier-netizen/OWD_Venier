@@ -841,8 +841,10 @@ if seleccion == "Nueva Auditoría":
                         )
 
                         id_condicional = int(
-                            pregunta_condicional
-                            .replace("P", "")
+                            float(
+                                pregunta_condicional
+                                .replace("P", "")
+                            )
                         )
 
                         respuesta_anterior = (
@@ -851,9 +853,15 @@ if seleccion == "Nueva Auditoría":
                             )
                         )
 
+                        # Comparación sin distinguir mayúsculas/minúsculas
                         if (
                             str(respuesta_anterior)
-                            != valor_condicional
+                            .strip()
+                            .lower()
+                            !=
+                            str(valor_condicional)
+                            .strip()
+                            .lower()
                         ):
 
                             mostrar = False
