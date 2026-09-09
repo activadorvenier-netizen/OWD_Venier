@@ -688,7 +688,7 @@ if seleccion == "Nueva Auditoría":
 
                     id_padre = None
 
-                    # Código CORREGIDO
+                    # Código CORREGIDO - MANEJA ESPACIOS
                     if (
                         visible_si != ""
                         and visible_si.lower() not in ["nan", "none"]
@@ -696,11 +696,9 @@ if seleccion == "Nueva Auditoría":
 
                         try:
 
-                            condicion = visible_si.replace(" ", "")
-                            
-                            # Extraer el número después de 'P' y antes de '='
                             import re
-                            match = re.search(r'P(\d+)', condicion)
+                            # Buscar el número después de P, ignorando espacios
+                            match = re.search(r'P\s*(\d+)', visible_si)
                             if match:
                                 id_padre = int(match.group(1))
                             else:
@@ -815,7 +813,7 @@ if seleccion == "Nueva Auditoría":
                 # VISIBILIDAD CONDICIONAL
                 # ------------------------------------------------
 
-                # Código CORREGIDO
+                # Código CORREGIDO - MANEJA ESPACIOS
                 if (
                     visible_si != "nan"
                     and visible_si != ""
@@ -824,23 +822,19 @@ if seleccion == "Nueva Auditoría":
 
                     try:
 
-                        condicion = visible_si.replace(" ", "")
-                        
-                        # Extraer el ID y el valor condicional
                         import re
-                        match = re.search(r'P(\d+)=(.+)', condicion)
+                        # Buscar el patrón P123 = Si (con o sin espacios)
+                        match = re.search(r'P\s*(\d+)\s*=\s*(.+)', visible_si)
                         
                         if match:
                             id_condicional = int(match.group(1))
-                            valor_condicional = match.group(2)
+                            valor_condicional = match.group(2).strip()
                             
                             respuesta_anterior = respuestas.get(id_condicional)
                             
-                            # Verificar si la respuesta anterior existe
                             if respuesta_anterior is None:
                                 mostrar = False
                             else:
-                                # Normalizar ambos valores para comparación
                                 respuesta_normalizada = str(respuesta_anterior).strip().lower()
                                 valor_condicional_normalizado = str(valor_condicional).strip().lower()
                                 
