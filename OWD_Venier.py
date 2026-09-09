@@ -688,7 +688,7 @@ if seleccion == "Nueva Auditoría":
 
                     id_padre = None
 
-                    # Código CORREGIDO - MANEJA ESPACIOS
+                    # SECCIÓN 1 - ORDENAMIENTO (CORREGIDO)
                     if (
                         visible_si != ""
                         and visible_si.lower() not in ["nan", "none"]
@@ -813,7 +813,7 @@ if seleccion == "Nueva Auditoría":
                 # VISIBILIDAD CONDICIONAL
                 # ------------------------------------------------
 
-                # Código CORREGIDO - MANEJA ESPACIOS
+                # SECCIÓN 2 - VISIBILIDAD CONDICIONAL (CORREGIDO)
                 if (
                     visible_si != "nan"
                     and visible_si != ""
@@ -823,7 +823,16 @@ if seleccion == "Nueva Auditoría":
                     try:
 
                         import re
-                        # Buscar el patrón P123 = Si (con o sin espacios)
+                        import unicodedata
+                        
+                        def normalizar_texto(texto):
+                            """Elimina tildes y convierte a minúsculas"""
+                            texto = str(texto).strip().lower()
+                            # Eliminar tildes
+                            texto = unicodedata.normalize('NFKD', texto).encode('ASCII', 'ignore').decode('ASCII')
+                            return texto
+                        
+                        # Buscar el patrón P263 = Sí (con o sin espacios)
                         match = re.search(r'P\s*(\d+)\s*=\s*(.+)', visible_si)
                         
                         if match:
@@ -835,10 +844,8 @@ if seleccion == "Nueva Auditoría":
                             if respuesta_anterior is None:
                                 mostrar = False
                             else:
-                                respuesta_normalizada = str(respuesta_anterior).strip().lower()
-                                valor_condicional_normalizado = str(valor_condicional).strip().lower()
-                                
-                                if respuesta_normalizada != valor_condicional_normalizado:
+                                # Comparar sin tildes y en minúsculas
+                                if normalizar_texto(respuesta_anterior) != normalizar_texto(valor_condicional):
                                     mostrar = False
                         else:
                             mostrar = False
