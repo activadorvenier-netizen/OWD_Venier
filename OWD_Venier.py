@@ -660,8 +660,10 @@ if seleccion == "Nueva Auditoría":
             len(preguntas_proceso)
         )
 
-        # Orden estable: mantiene el orden original siempre que
-        # no exista una dependencia que obligue a mover una pregunta.
+        # ------------------------------------------------
+        # ORDENAR RESPETANDO DEPENDENCIAS
+        # ------------------------------------------------
+
         filas_ordenadas = []
         ids_ya_mostrados = set()
 
@@ -691,14 +693,34 @@ if seleccion == "Nueva Auditoría":
                     ):
 
                         try:
-                            id_padre = int(
+
+                            condicion = (
                                 visible_si
                                 .replace(" ", "")
-                                .split("=")[0]
-                                .replace("P", "")
                             )
+
+                            pregunta_condicional = (
+                                condicion.split("=")[0]
+                            )
+
+                            id_padre = int(
+                                float(
+                                    pregunta_condicional
+                                    .replace("P", "")
+                                )
+                            )
+
                         except:
+
                             id_padre = None
+
+                    # --------------------------------------------
+                    # LA PREGUNTA SE PUEDE AGREGAR SI:
+                    #
+                    # - No tiene dependencia
+                    # - La dependencia no existe
+                    # - La pregunta padre ya fue agregada
+                    # --------------------------------------------
 
                     if (
                         id_padre is None
@@ -712,27 +734,48 @@ if seleccion == "Nueva Auditoría":
                     ):
 
                         filas_ordenadas.append(indice)
+
                         ids_ya_mostrados.add(
-                            int(fila["ID"])
+                            int(
+                                float(
+                                    fila["ID"]
+                                )
+                            )
                         )
+
                         pendientes = pendientes.drop(indice)
+
                         progreso = True
+
                         break
 
                 if not progreso:
-                    # Evita bloquear el formulario si existe una
-                    # dependencia mal configurada o circular.
+
+                    # Si existe una dependencia mal configurada
+                    # o circular, mantiene el orden original
+                    # para no bloquear el formulario.
+
                     for indice, fila in pendientes.iterrows():
+
                         filas_ordenadas.append(indice)
+
                         ids_ya_mostrados.add(
-                            int(fila["ID"])
+                            int(
+                                float(
+                                    fila["ID"]
+                                )
+                            )
                         )
+
                     break
 
         preguntas_proceso = preguntas_proceso.loc[
             filas_ordenadas
         ].drop(
-            columns=["_ORDEN_SECCION", "_ORDEN_ORIGINAL"]
+            columns=[
+                "_ORDEN_SECCION",
+                "_ORDEN_ORIGINAL"
+            ]
         )
 
         # ------------------------------------------------
