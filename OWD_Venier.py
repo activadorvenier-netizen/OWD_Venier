@@ -644,18 +644,95 @@ if seleccion == "Nueva Auditoría":
         # ------------------------------------------------
         # ORDENAR PREGUNTAS
         # PROCESO PRIMERO - GENERALES DESPUÉS
+        # Y PREGUNTAS DEPENDIENTES DESPUÉS DE SU PADRE
         # ------------------------------------------------
 
         preguntas_proceso["_ORDEN_SECCION"] = (
             preguntas_proceso["SECCION"]
+            .astype(str)
             .str.strip()
             .str.lower()
             .eq("preguntas generales")
             .astype(int)
         )
 
-        preguntas_proceso = preguntas_proceso.sort_values(
-            by=["_ORDEN_SECCION", "ID"]
+        preguntas_proceso["_ORDEN_ORIGINAL"] = range(
+            len(preguntas_proceso)
+        )
+
+        # Orden estable: mantiene el orden original siempre que
+        # no exista una dependencia que obligue a mover una pregunta.
+        filas_ordenadas = []
+        ids_ya_mostrados = set()
+
+        for orden_seccion in [0, 1]:
+
+            pendientes = preguntas_proceso[
+                preguntas_proceso["_ORDEN_SECCION"] == orden_seccion
+            ].sort_values(
+                by="_ORDEN_ORIGINAL"
+            ).copy()
+
+            while not pendientes.empty:
+
+                progreso = False
+
+                for indice, fila in pendientes.iterrows():
+
+                    visible_si = str(
+                        fila["VISIBLE_SI"]
+                    ).strip()
+
+                    id_padre = None
+
+                    if (
+                        visible_si != ""
+                        and visible_si.lower() not in ["nan", "none"]
+                    ):
+
+                        try:
+                            id_padre = int(
+                                visible_si
+                                .replace(" ", "")
+                                .split("=")[0]
+                                .replace("P", "")
+                            )
+                        except:
+                            id_padre = None
+
+                    if (
+                        id_padre is None
+                        or id_padre not in set(
+                            pd.to_numeric(
+                                preguntas_proceso["ID"],
+                                errors="coerce"
+                            ).dropna().astype(int)
+                        )
+                        or id_padre in ids_ya_mostrados
+                    ):
+
+                        filas_ordenadas.append(indice)
+                        ids_ya_mostrados.add(
+                            int(fila["ID"])
+                        )
+                        pendientes = pendientes.drop(indice)
+                        progreso = True
+                        break
+
+                if not progreso:
+                    # Evita bloquear el formulario si existe una
+                    # dependencia mal configurada o circular.
+                    for indice, fila in pendientes.iterrows():
+                        filas_ordenadas.append(indice)
+                        ids_ya_mostrados.add(
+                            int(fila["ID"])
+                        )
+                    break
+
+        preguntas_proceso = preguntas_proceso.loc[
+            filas_ordenadas
+        ].drop(
+            columns=["_ORDEN_SECCION", "_ORDEN_ORIGINAL"]
         )
 
         # ------------------------------------------------
