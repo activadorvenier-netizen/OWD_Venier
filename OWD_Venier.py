@@ -8,6 +8,7 @@ from streamlit_calendar import calendar
 from sqlalchemy import create_engine
 import cloudinary
 import cloudinary.uploader
+import re
 
 import io
 import json
@@ -152,7 +153,7 @@ def actualizar_pda_sql(
 
 # ------------------------------------------------
 # SUBIR IMAGEN A CLOUDINARY
-# # ------------------------------------------------
+# ------------------------------------------------
 
 def subir_imagen_cloudinary(
     archivo,
@@ -687,6 +688,7 @@ if seleccion == "Nueva Auditoría":
 
                     id_padre = None
 
+                    # Código CORREGIDO
                     if (
                         visible_si != ""
                         and visible_si.lower() not in ["nan", "none"]
@@ -694,21 +696,15 @@ if seleccion == "Nueva Auditoría":
 
                         try:
 
-                            condicion = (
-                                visible_si
-                                .replace(" ", "")
-                            )
-
-                            pregunta_condicional = (
-                                condicion.split("=")[0]
-                            )
-
-                            id_padre = int(
-                                float(
-                                    pregunta_condicional
-                                    .replace("P", "")
-                                )
-                            )
+                            condicion = visible_si.replace(" ", "")
+                            
+                            # Extraer el número después de 'P' y antes de '='
+                            import re
+                            match = re.search(r'P(\d+)', condicion)
+                            if match:
+                                id_padre = int(match.group(1))
+                            else:
+                                id_padre = None
 
                         except:
 
@@ -819,6 +815,7 @@ if seleccion == "Nueva Auditoría":
                 # VISIBILIDAD CONDICIONAL
                 # ------------------------------------------------
 
+                # Código CORREGIDO
                 if (
                     visible_si != "nan"
                     and visible_si != ""
@@ -827,47 +824,32 @@ if seleccion == "Nueva Auditoría":
 
                     try:
 
-                        condicion = (
-                            visible_si
-                            .replace(" ", "")
-                        )
-
-                        pregunta_condicional = (
-                            condicion.split("=")[0]
-                        )
-
-                        valor_condicional = (
-                            condicion.split("=")[1]
-                        )
-
-                        id_condicional = int(
-                            float(
-                                pregunta_condicional
-                                .replace("P", "")
-                            )
-                        )
-
-                        respuesta_anterior = (
-                            respuestas.get(
-                                id_condicional
-                            )
-                        )
-
-                        # Comparación sin distinguir mayúsculas/minúsculas
-                        if (
-                            str(respuesta_anterior)
-                            .strip()
-                            .lower()
-                            !=
-                            str(valor_condicional)
-                            .strip()
-                            .lower()
-                        ):
-
+                        condicion = visible_si.replace(" ", "")
+                        
+                        # Extraer el ID y el valor condicional
+                        import re
+                        match = re.search(r'P(\d+)=(.+)', condicion)
+                        
+                        if match:
+                            id_condicional = int(match.group(1))
+                            valor_condicional = match.group(2)
+                            
+                            respuesta_anterior = respuestas.get(id_condicional)
+                            
+                            # Verificar si la respuesta anterior existe
+                            if respuesta_anterior is None:
+                                mostrar = False
+                            else:
+                                # Normalizar ambos valores para comparación
+                                respuesta_normalizada = str(respuesta_anterior).strip().lower()
+                                valor_condicional_normalizado = str(valor_condicional).strip().lower()
+                                
+                                if respuesta_normalizada != valor_condicional_normalizado:
+                                    mostrar = False
+                        else:
                             mostrar = False
 
                     except:
-
                         mostrar = False
 
                 # ------------------------------------------------
