@@ -818,7 +818,6 @@ if seleccion == "Nueva Auditoría":
                 # VISIBILIDAD CONDICIONAL
                 # ------------------------------------------------
 
-                # SECCIÓN 2 - VISIBILIDAD CONDICIONAL (CORREGIDO)
                 if (
                     visible_si != "nan"
                     and visible_si != ""
@@ -829,27 +828,30 @@ if seleccion == "Nueva Auditoría":
 
                         import re
                         import unicodedata
-                        
+
                         def normalizar_texto(texto):
-                            """Elimina tildes y convierte a minúsculas"""
                             texto = str(texto).strip().lower()
-                            # Eliminar tildes
                             texto = unicodedata.normalize('NFKD', texto).encode('ASCII', 'ignore').decode('ASCII')
+                            texto = texto.replace(' ', '')
                             return texto
-                        
-                        # Buscar el patrón P263 = Sí (con o sin espacios)
+
                         match = re.search(r'P\s*(\d+)\s*=\s*(.+)', visible_si)
-                        
+
                         if match:
                             id_condicional = int(match.group(1))
                             valor_condicional = match.group(2).strip()
-                            
-                            respuesta_anterior = respuestas.get(id_condicional)
-                            
+
+                            # CLAVE: leer el valor actual del widget desde session_state
+                            key_padre = f"{st.session_state.form_id}_pregunta_{id_condicional}"
+                            respuesta_anterior = st.session_state.get(key_padre, None)
+
+                            # Fallback al diccionario respuestas por si acaso
                             if respuesta_anterior is None:
+                                respuesta_anterior = respuestas.get(id_condicional)
+
+                            if respuesta_anterior is None or str(respuesta_anterior).strip() == "":
                                 mostrar = False
                             else:
-                                # Comparar sin tildes y en minúsculas
                                 if normalizar_texto(respuesta_anterior) != normalizar_texto(valor_condicional):
                                     mostrar = False
                         else:
@@ -857,7 +859,6 @@ if seleccion == "Nueva Auditoría":
 
                     except:
                         mostrar = False
-
                 # ------------------------------------------------
                 # MOSTRAR PREGUNTA
                 # ------------------------------------------------
