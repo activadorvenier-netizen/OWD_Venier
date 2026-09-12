@@ -791,10 +791,6 @@ if seleccion == "Nueva Auditoría":
                 == seccion
             ]
 
-            # Variable para rastrear si se seleccionó "Si" en "Requiere Plan de Acción"
-            requiere_pda_seleccionado = False
-            id_pregunta_pda = None
-
             # Primera pasada: mostrar todas las preguntas y capturar respuestas de PDA
             for _, fila in preguntas_seccion.iterrows():
 
@@ -890,12 +886,6 @@ if seleccion == "Nueva Auditoría":
                             )
                         )
 
-                        # Capturar si es la pregunta "Requiere Plan de Acción"
-                        if pregunta == "Requiere Plan de Acción":
-                            if respuesta == "Si":
-                                requiere_pda_seleccionado = True
-                                id_pregunta_pda = pregunta_id
-
                     # ------------------------------------------------
                     # SELECT
                     # ------------------------------------------------
@@ -987,47 +977,6 @@ if seleccion == "Nueva Auditoría":
                         )
 
                     respuestas[pregunta_id] = respuesta
-
-            # Segunda pasada: mostrar las preguntas dependientes del PDA (Plan de Acción, Responsable, Fecha Límite)
-            # Estas preguntas deben mostrarse SOLO si "Requiere Plan de Acción" = "Si"
-            if requiere_pda_seleccionado:
-                for _, fila in preguntas_seccion.iterrows():
-                    pregunta = str(fila["PREGUNTA"])
-                    pregunta_id = fila["ID"]
-                    
-                    # Si la pregunta es Plan de Acción, Responsable o Fecha Límite, mostrarla
-                    if pregunta in ["Plan de Acción", "Responsable", "Fecha Limite"]:
-                        tipo = str(fila["TIPO"]).strip().upper()
-                        respuesta = None
-                        
-                        if tipo == "TEXTO":
-                            if pregunta == "Responsable":
-                                respuesta = st.selectbox(
-                                    pregunta,
-                                    [""] + lista_auditores,
-                                    key=(
-                                        f"{st.session_state.form_id}"
-                                        f"_pregunta_{pregunta_id}"
-                                    )
-                                )
-                            else:
-                                respuesta = st.text_area(
-                                    pregunta,
-                                    key=(
-                                        f"{st.session_state.form_id}"
-                                        f"_pregunta_{pregunta_id}"
-                                    )
-                                )
-                        elif tipo == "FECHA":
-                            respuesta = st.date_input(
-                                pregunta,
-                                key=(
-                                    f"{st.session_state.form_id}"
-                                    f"_pregunta_{pregunta_id}"
-                                )
-                            )
-                        
-                        respuestas[pregunta_id] = respuesta
 
         st.divider()
 
